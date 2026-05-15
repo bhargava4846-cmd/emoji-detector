@@ -72,11 +72,18 @@ async function detectEmojis() {
 
         const data = await response.json();
 
-        // Display results
-        document.getElementById("emojiDisplay").textContent =
-            data.emojis && data.emojis.length > 0
-                ? data.emojis.join("  ")
-                : "🤷";
+        // Display results — one card per emoji with its name
+        const display = document.getElementById("emojiDisplay");
+        if (data.emojis && data.emojis.length > 0) {
+            display.innerHTML = data.emojis.map(item =>
+                `<div class="emoji-card">
+                    <span class="emoji-char">${item.emoji}</span>
+                    <span class="emoji-name">${item.name}</span>
+                </div>`
+            ).join("");
+        } else {
+            display.innerHTML = `<div class="emoji-card"><span class="emoji-char">🤷</span><span class="emoji-name">No Match</span></div>`;
+        }
 
         document.getElementById("explanation").textContent =
             data.explanation || "No explanation provided.";
@@ -93,11 +100,12 @@ async function detectEmojis() {
     }
 }
 
-// ── Copy emojis to clipboard ──
+// ── Copy emojis to clipboard (only the emoji characters, not the names) ──
 function copyEmojis() {
-    const emojis = document.getElementById("emojiDisplay").textContent.trim();
-    navigator.clipboard.writeText(emojis)
-        .then(() => showToast("Copied! " + emojis))
+    const chars = [...document.querySelectorAll(".emoji-char")]
+        .map(el => el.textContent).join(" ");
+    navigator.clipboard.writeText(chars)
+        .then(() => showToast("Copied! " + chars))
         .catch(() => showToast("Copy failed — try selecting manually", "#dc3545"));
 }
 

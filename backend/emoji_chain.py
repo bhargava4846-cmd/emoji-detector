@@ -62,12 +62,22 @@ Reply with JSON only."""
             raw = raw[4:]
         raw = raw.strip()
 
+    # Build a lookup map so we can attach names to whatever Claude picks
+    name_map = {c["emoji"]: c["name"] for c in candidates}
+
     try:
         result = json.loads(raw)
+        # Enrich each emoji with its name
+        result["emojis"] = [
+            {"emoji": e, "name": name_map.get(e, "").title()}
+            for e in result.get("emojis", [])
+        ]
         return result
     except json.JSONDecodeError:
-        # Fallback: return top 3 candidates if JSON parsing fails
         return {
-            "emojis": [e["emoji"] for e in candidates[:3]],
+            "emojis": [
+                {"emoji": c["emoji"], "name": c["name"].title()}
+                for c in candidates[:3]
+            ],
             "explanation": "Here are the closest matching emojis for your text."
         }
