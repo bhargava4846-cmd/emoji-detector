@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Emoji Detector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>AI Emoji Detector</h1>
+            <p class="subtitle">Type anything — AI finds the perfect emojis for you</p>
+        </div>
+
+        <!-- Input Card -->
+        <div class="card">
+            <label class="input-label">Your Message</label>
+            <textarea
+                id="textInput"
+                placeholder="e.g. I just got promoted at work!"
+                rows="4"
+            ></textarea>
+            <div class="char-count"><span id="charCount">0</span> characters</div>
+
+            <!-- Safe Search Toggle -->
+            <div class="safe-search-row">
+                <div class="safe-search-info">
+                    <span class="safe-label">Safe Search</span>
+                    <span class="safe-desc">Filters adult content</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="safeSearchToggle" checked>
+                    <span class="track">
+                        <span class="thumb"></span>
+                    </span>
+                    <span id="toggleText" class="toggle-text on">ON</span>
+                </label>
+            </div>
+
+            <!-- Adult Warning -->
+            <div id="adultWarning" class="adult-warning hidden">
+                ⚠️ Safe Search is OFF — adult content may appear in results.
+            </div>
+
+            <!-- Detect Button -->
+            <button id="detectBtn" onclick="detectEmojis()">
+                <span id="btnText">Detect Emojis</span>
+                <span id="btnIcon">✨</span>
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="card loading-card hidden">
+            <div class="spinner"></div>
+            <p>AI is thinking...</p>
+            <p class="loading-sub">Searching emoji database + asking Claude</p>
+        </div>
+
+        <!-- Results Card -->
+        <div id="resultsCard" class="card results-card hidden">
+            <div class="results-header">
+                <span class="results-title">Suggested Emojis</span>
+                <button class="copy-btn" onclick="copyEmojis()">Copy 📋</button>
+            </div>
+
+            <div id="emojiDisplay" class="emoji-display"></div>
+
+            <div class="explanation-box">
+                <span class="explanation-label">Why these?</span>
+                <p id="explanation"></p>
+            </div>
+
+            <button class="try-again-btn" onclick="tryAgain()">Try Another ↩</button>
+        </div>
+
+        <!-- Example Prompts -->
+        <div class="examples">
+            <p class="examples-label">Try these:</p>
+            <div class="example-chips">
+                <button class="chip" onclick="fillExample(this)">I just got a promotion! 🎯</button>
+                <button class="chip" onclick="fillExample(this)">Feeling sad today</button>
+                <button class="chip" onclick="fillExample(this)">Pizza for dinner!</button>
+                <button class="chip" onclick="fillExample(this)">I'm so angry right now</button>
+                <button class="chip" onclick="fillExample(this)">Going to the gym 💪</button>
+                <button class="chip" onclick="fillExample(this)">Miss you so much</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
