@@ -1,1019 +1,4587 @@
-Finance Data Dictionary Interactive Portal (HTML + AI Enabled) - Business Requirements & Functional Specification
-Executive Summary
-Create a centralized Finance Data Dictionary Portal hosted entirely on a shared drive. The solution will provide chartfield education, combination validation, terminology lookup, tree exploration and future AI capabilities.
-Project Objectives
-Provide a single source of truth, reduce dependency on Excel, enable self-service validation and support future AI guidance.
-Scope
-•	ChartFields Overview
-•	Combination Validator
-•	Finance Terminology
-•	ChartField Trees Explorer
-•	Miscellaneous Knowledge Area
-•	AI Assistant Integration
-Critical Design Principles
-•	Reference Excel workbook is sample/reference only.
-•	All solution artifacts remain on shared drive.
-•	No external database required.
-•	JSON configuration drives application logic.
-•	Local rule engine first, AI second.
-Reference Workbook Usage
-•	Workbook provides sample values, definitions and structures only.
-•	Portal must continue functioning without workbook availability.
-Tab 1 – ChartFields Overview
-•	Visual poster-style representation of Business Unit, Function, Business Line, Market, Account, Alternate Account, Affiliate, Project ID and Book Code.
-•	Hover and click interactions for definitions and examples.
-Tab 2 – Combination Validator
-•	Nine chartfield input controls available.
-•	Fields are optional and not mandatory.
-•	Validate only rules applicable to entered fields.
-•	Return Valid, Invalid or No Applicable Rule Found.
-•	Display violated rule, explanation and recommendation.
-Validation Engine
-•	Store rules in JSON.
-•	Support active Combination Edit logic.
-•	Evaluate ACT_PROJ, ACT_AFF, BL_PRJ, MKT_FCT, BK_ACT and other active rules.
-AI Integration Rules
-•	No AI invocation during standard validation.
-•	AI only for Explain Result, recommendations, free-form questions or unmatched cases.
-•	Use Local JSON => Rule Engine => AI escalation model.
-Tab 3 – Finance Terminology
-•	Searchable glossary using terminology definitions.
-•	Display definition, examples, source systems and consuming systems.
-Tab 4 – ChartField Trees
-•	Collapsible hierarchy browser.
-•	Search nodes and tree metadata.
-Tab 5 – Miscellaneous
-•	Asset Classes
-•	Employee Definitions
-•	Employee Measures
-•	TimeSpans
-•	Project Types
-Shared Drive Architecture
-•	Store HTML, CSS, JS, JSON, images and reference workbook on shared drive only.
-•	No storage outside shared drive.
-Security Requirements
-•	API keys must never be stored in client-side code.
-•	JWT tokens must not be exposed in browser.
-•	Use backend proxy for future AI integration.
-Future Enhancements
-•	Admin page for JSON refresh.
-•	Workbook-to-JSON conversion utility.
-•	Advanced AI assistant.
-Acceptance Criteria
-•	Portal loads within three seconds.
-•	Users can validate chartfield combinations.
-•	Users can search terminology.
-•	AI is called only when required.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JLL GPT API Test</title>
+</head>
+<body>
+  <h1>JLL GPT API Test</h1>
+
+  <textarea id="promptInput" rows="4" cols="50" placeholder="Enter your prompt here"></textarea>
+  <br />
+  <button id="sendBtn">Send</button>
+
+  <pre id="responseOutput"></pre>
+
+  <script>
+    // Replace these with your actual credentials (for local testing only).
+    const OKTA_TOKEN = "PASTE_YOUR_OKTA_JWT_HERE";
+    const SUBSCRIPTION_KEY = "PASTE_YOUR_SUBSCRIPTION_KEY_HERE";
+
+    // Replace with the actual API endpoint from your documentation.
+    const API_ENDPOINT = "https://your-api-domain.com/v1/chat/completions";
+
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const userPrompt = document.getElementById("promptInput").value;
+      const outputEl = document.getElementById("responseOutput");
+      outputEl.textContent = "Sending request...";
+
+      const requestBody = {
+        model: "gpt-4",
+        messages: [
+          { role: "user", content: userPrompt }
+        ]
+      };
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${OKTA_TOKEN}`,
+            "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        outputEl.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        outputEl.textContent = "Error: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+Quick Start Guide
+Follow these steps to get started with the Falcon API:
+
+1. Get API access credentials
+You'll need a subscription key and access token to use the Falcon API. For development purposes, you can obtain temporary credentials from the Developer Sandbox.
+
+2. Make your first API call
+JavaScript
+Python
+cURL
+C#
+javascript
+Copy
+const response = await fetch('https://api-qa.jll.com/csp/chat-service/api/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${jwt_token}`,
+    'subscription-key': subscription_key,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant.' },
+      { role: 'user', content: 'Hello, I have a question about commercial real estate.' }
+    ],
+    model: 'gpt-4',
+    temperature: 0.7
+  })
+});
+3. Process the response
+javascript
+Copy
+const data = await response.json();
+console.log(data.choices[0].message.content);
+API Types
+Falcon provides multiple API endpoints to suit different use cases:
+
+Non-Persistent Chat API
+The non-persistent chat API is ideal for simple, stateless chat interactions. It doesn't store conversation history between requests.
+
+JavaScript
+Python
+Non-Persistent API
+Copy
+const response = await fetch('https://api-qa.jll.com/csp/chat-service/api/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${jwt_token}`,
+    'subscription-key': subscription_key,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant.' },
+      { role: 'user', content: 'What are the current trends in office space?' }
+    ],
+    model: 'gpt-4',
+    temperature: 0.7
+  })
+});
+Persistent Chat API
+The persistent chat API maintains conversation history between requests, allowing for more contextual and ongoing conversations.
+
+JavaScript
+Python
+Persistent API
+Copy
+// Step 1: Create a conversation
+let conversationId;
+
+const createConversation = async() => {
+  const response = await fetch('https://api-qa.jll.com/csp/chat-service/api/v1/conversations', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`,
+      'subscription-key': subscription_key,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      title: 'Real Estate Discussion'
+    })
+  });
+  
+  const data = await response.json();
+  conversationId = data.id;
+  return conversationId;
+};
+
+// Step 2: Send a message to the conversation
+const sendMessage = async(conversationId, message) => {
+  const response = await fetch(`https://api-qa.jll.com/csp/chat-service/api/v1/conversations/${conversationId}/messages`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwt_token}`,
+      'subscription-key': subscription_key,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: message }]
+    })
+  });
+  
+  return await response.json();
+};
+Embeddings API
+The embeddings API converts text into vector representations that can be used for semantic search, recommendations, and other machine learning applications.
+
+JavaScript
+Python
+Embeddings API
+Copy
+const response = await fetch('https://api-qa.jll.com/csp/chat-service/api/v1/embeddings', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${jwt_token}`,
+    'subscription-key': subscription_key,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    input: [
+      'Commercial real estate in Chicago',
+      'Office space trends for 2024'
+    ],
+    model: 'text-embedding-ada-002'
+  })
+});
+
+const data = await response.json();
+const embeddings = data.data.map(item => item.embedding);
+Using Built-in Tools
+Use built-in tools like web search and file search to extend the model's capabilities.
+
+When generating model responses, you can extend model capabilities using built-in tools. These tools help models access additional context and information from the web or your files. The web search tool is available through Gemini uses the latest information from the web to generate a model response.
+
+Note that currently the file search and computer use tools are only available using the new Responses API.
+
+Web Search
+Currently, you need to use one of these models to use web search in Chat Completions:
+
+Web Search with Gemini 3.5 Flash
+Web Search with Gemini 2.5 Flash
+Web Search with Gemini 2.5 Pro
+Access code examples in Github
+
+Using Web Search with Gemini 3.5 Flash
+Gemini 3.5 Flash is optimized for default sampling, so the API does not apply a temperature value to requests for this model. Omit it rather than setting it — a value passed here has no effect on the response.
+
+Python
+Python
+Copy
+# Install required packages
+# %pip install uuid openai
+
+# Initiate OpenAI client with following mandatory settings:
+# base_url: set JLL GPT API endpoint
+# api_key: set to jwt token
+# subscription-key header: set to APIM subscription key
+# jll-request-id: correlation id that is used to trace the request in the API log, faciltating troubleshooting.
+# Use ODIC token for jwt_token. ODIC token is acquired from user UI login and contains information about the actual user.
+
+import uuid
+from openai import OpenAI
+
+api_url = "https://api-qa.jll.com/csp/chat-service/api/v1"
+jwt_token = ""   # Replace with your access token
+subscription_key = "" # Replace with your subscription key
+
+correlation_id = str(uuid.uuid4())
+
+client = OpenAI(
+    api_key=jwt_token,
+    base_url=api_url,
+    default_headers={
+        "Subscription-Key": subscription_key,
+        'jll-request-id': correlation_id
+    }
+)
+
+# Invoke chat completion API and get response
+try:
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an assistant"
+            },
+            {
+                "role": "user",
+                "content": "Who is the prime minister of Canada?",
+            }
+        ],
+        model="GEMINI_35_FLASH",
+        max_tokens=2000,
+        extra_body={
+            "web_search_options": {
+                "enabled": True
+            }
+        }
+    )
+
+    print(chat_completion.choices[0].message.content)
+
+except Exception as e:
+    print(f'HTTP Request failed (correlation_id: {correlation_id}):', e)
+Using Web Search with Gemini 2.5 Flash
+Python
+Python
+Copy
+# Install required packages
+# %pip install uuid openai
+
+# Initiate OpenAI client with following mandatory settings:
+# base_url: set JLL GPT API endpoint
+# api_key: set to jwt token
+# subscription-key header: set to APIM subscription key
+# jll-request-id: correlation id that is used to trace the request in the API log, faciltating troubleshooting.
+# Use ODIC token for jwt_token. ODIC token is acquired from user UI login and contains information about the actual user.
+
+import uuid
+from openai import OpenAI
+
+api_url = "https://api-qa.jll.com/csp/chat-service/api/v1"
+jwt_token = ""   # Replace with your access token
+subscription_key = "" # Replace with your subscription key
+
+correlation_id = str(uuid.uuid4())
+
+client = OpenAI(
+    api_key=jwt_token,
+    base_url=api_url,
+    default_headers={
+        "Subscription-Key": subscription_key,
+        'jll-request-id': correlation_id
+    }
+)
+
+# Invoke chat completion API and get response
+try:
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an assistant"
+            },
+            {
+                "role": "user",
+                "content": "Who is the prime minister of Canada?",
+            }
+        ],
+        model="GEMINI_25_FLASH",
+        max_tokens=2000,
+        temperature=0.1,
+        extra_body={
+            "web_search_options": {
+                "enabled": True
+            }
+        }
+    )
+
+    print(chat_completion.choices[0].message.content)
+
+except Exception as e:
+    print(f'HTTP Request failed (correlation_id: {correlation_id}):', e)
+Using Web Search with Gemini 2.5 Pro
+Python
+Python
+Copy
+# Install required packages
+# %pip install uuid openai
+
+# Initiate OpenAI client with following mandatory settings:
+# base_url: set JLL GPT API endpoint
+# api_key: set to jwt token
+# subscription-key header: set to APIM subscription key
+# jll-request-id: correlation id that is used to trace the request in the API log, faciltating troubleshooting.
+# Use ODIC token for jwt_token. ODIC token is acquired from user UI login and contains information about the actual user.
+
+import uuid
+from openai import OpenAI
+
+api_url = "https://api-qa.jll.com/csp/chat-service/api/v1"
+jwt_token = ""   # Replace with your access token
+subscription_key = "" # Replace with your subscription key
+
+correlation_id = str(uuid.uuid4())
+
+client = OpenAI(
+    api_key=jwt_token,
+    base_url=api_url,
+    default_headers={
+        "Subscription-Key": subscription_key,
+        'jll-request-id': correlation_id
+    }
+)
+
+# Invoke chat completion API and get response
+try:
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an assistant"
+            },
+            {
+                "role": "user",
+                "content": "Who is the prime minister of Canada?",
+            }
+        ],
+        model="GEMINI_25_PRO",
+        max_tokens=2000,
+        temperature=0.1,
+        extra_body={
+            "web_search_options": {
+                "enabled": True
+            }
+        }
+    )
+
+    print(chat_completion.choices[0].message.content)
+
+except Exception as e:
+    print(f'HTTP Request failed (correlation_id: {correlation_id}):', e)
+Browser Use
+Enable models to interact with web browsers to automate complex workflows and access real-time information.
+
+Overview
+Browser Use is a powerful capability that allows JLL GPT to directly interact with web browsers. Based on an open-source project and adapted for JLL GPT compatibility, this tool feeds screen contents from the browser to multimodal foundation models and uses LangChain's agentic AI components for reasoning and task completion.
+
+This capability enables automated navigation, data extraction, and complex workflow execution across internal and external web applications.
+
+How It Works
+The Browser Use agent:
+
+Captures and analyzes browser screen contents
+Interprets visual information through multimodal AI models
+Makes decisions based on content analysis
+Executes browser interactions (clicking, typing, navigating)
+Completes complex multi-step workflows autonomously
+Example Use Cases
+Example 1: Real Estate Data Extraction from Horizon
+Task: Extract data about the largest Brookfield deal in Horizon, including the primary broker
+
+Prompt Used:
+Go to https://horizon.jll.com/
+Sign in using SAML
+In the search bar, type "Brookfield"
+In the list of results, find what appears to be the largest deal by square feet
+Open that deal
+Find who the primary broker was on the deal
+Result:
+The agent successfully navigated to Horizon, authenticated, searched for Brookfield deals, identified the largest one (Brookfield Place at 8,400,000 square feet), and determined that Michael Shenot was the primary broker. Watch Demo Video
+
+Example 2: Cross-Platform Property Listing Analysis
+Task: Identify JLL properties not advertised on LoopNet and report via email
+
+Prompt Used:
+Go to https://property.jll.com/search?tenureTypes=rent&propertyTypes=office&orderBy=desc&searchInput=New%20York&sortBy=dateModified
+Pick up the first 5 addresses of properties
+For each property, search Google to see if the property exists on LoopNet. If it does, copy the link to LoopNet and continue. If it does not, remember this information for the next step
+Go to https://outlook.office.com/mail/
+Compose a new email with the subject line: "JLL properties not advertised on LoopNet", to: "or.hiltch@jll.com"
+In the body of the email, write: "Dear Or, I have found some properties that appear to be marketed on the JLL leasing website, but are not advertised on LoopNet: {addresses of properties from the JLL website where no corresponding link was found on LoopNet}"
+Result:
+The agent successfully gathered property information from JLL.com, cross-referenced each property on LoopNet via Google search, identified missing listings, and composed an email report with the findings. Watch Demo Video
+
+GitHub Repository
+Find complete working examples and source code in our Browser Use GitHub repository. The repository includes detailed documentation, setup instructions, and implementation examples.
+
+Implementation Example
+Below is a comprehensive implementation example showing how to use the Browser Use capability with different LLM providers. Click to expand the code sections.
+
+Current Limitations
+While Browser Use offers powerful automation capabilities, it is still evolving with the following limitations:
+
+Performance varies based on webpage complexity and load times
+May require specific, detailed prompts for optimal results
+Complex authentication flows might present challenges
+Limited ability to handle dynamically changing web interfaces
+The Browser Use capability continues to improve and offers significant potential for automating complex web-based workflows.
+
+Computer Use
+Computer use is a practical application of our Computer-Using Agent (CUA) model, computer-use-preview, which combines the vision capabilities of GPT-4o with advanced reasoning to simulate controlling computer interfaces and performing tasks. Computer use is available through the Responses API. The computer use tool operates in a continuous loop. It sends computer actions, like click(x,y) or type(text), which your code executes on a computer or browser environment and then returns screenshots of the outcomes back to the model. In this way, your code simulates the actions of a human using a computer interface, while our model uses the screenshots to understand the state of the environment and suggest next actions. This loop lets you automate many tasks requiring clicking, typing, scrolling, and more. For example, booking a flight, searching for a product, or filling out a form.
+
+For more details, refer to the offical site of Computer use.
+
+Custom Assistant(RAG)
+Custom Assistants are customizable versions of JLL GPT that can be tailored for specific tasks, roles, or domains. Think of them as specialized AI assistants that have been configured with particular knowledge, abilities, and personality traits to serve specific purposes within our organization.
+
+Overview
+Custom Assistants use Retrieval Augmented Generation (RAG) to combine the power of large language models with access to specialized knowledge bases. This approach enables more accurate, relevant, and domain-specific responses that are grounded in your organization's information.
+
+Understanding RAG Technology
+In traditional LLMs, the model generates responses based solely on the data it was trained on, which may not include the most current information or specific details required for certain tasks. RAG addresses this limitation by incorporating a retrieval mechanism that allows the model to access external databases or documents in real-time.
+
+This hybrid model aims to leverage the vast amounts of information available in large-scale databases or knowledge bases, making it particularly effective for tasks that require accurate and contextually relevant information.
+
+How does Retrieval-Augmented Generation work?
+The RAG process consists of several key steps:
+
+The system searches external sources for relevant information based on the user's query, instead of relying only on existing training data
+Retrieved information is processed and added to the context of the user's query
+The language model then generates a response that incorporates both its inherent knowledge and the retrieved information
+This approach ensures responses are both contextually appropriate and factually accurate
+Creating a Custom Assistant
+Creating your own Custom Assistant in JLL GPT is a straightforward process:
+
+Create assistant in JLL GPT - Start the process through the JLL GPT interface
+Describe the assistant's purpose - Define what your assistant will help with and the domain expertise needed
+Specify the data sources and files - Select documents, knowledge bases, and files for the assistant's knowledge base
+Publish assistant - Make your assistant available for use
+Share with your team - Up to 100 users can try and test your custom assistant initially
+Scale to more users - Create an Active Directory group and reach out to the AI Support team to add more than 100 users
+Using the RAG API
+You can send RAG requests via both Persistent API and non-persistent API. For non-persistent API, you will need a special M2M token setup (Refer to How to invoke RAG query with M2M Token).
+
+Required Headers
+subscription-key - Your API subscription key
+authorization - User OIDC Token or special M2M token specified above
+Non-Persistent API
+POST /chat/completions
+Copy
+{
+  "messages": [
+    {
+      "content": "Your query",
+      "role": "user"
+    }
+  ],
+  "model": "GPT_4_O",
+  "temperature": 0.2,
+  "ragOptions": {
+    "assistantId": "<RAG assistant id e.g. 142345112>",
+    "versionType": "<RAG project version e.g. published|draft>"
+  }
+}
+Submit query to non-persistent API as per normal, with additional ragOptions with project name to query against the RAG project.
+
+Persistent API
+POST /conversations
+Copy
+{
+  "message": "Your query",
+  "requestOptions": {
+    "temperature": 0.2,
+    "model": "GPT_4_O"
+  },
+  "ragOptions": {
+    "assistantId": "<RAG assistant id e.g. 142345112>",
+    "versionType": "<RAG project version e.g. published|draft>"
+  }
+}
+Submit query to persistent API as per normal, with additional ragOptions with project name to query against the RAG project.
+
+Embedding API
+Use this when your application needs to get embeddings for one or more inputs, typically strings.
+
+API Headers:
+
+subscription-key - Your API subscription key
+authorization - M2M Token or User JWT Token
+POST /embeddings
+Copy
+{
+  "inputs": [
+    "Sentence 1",
+    "Sentence 2"
+  ],
+  "requestOptions": {
+    "model": "TEXT_EMBEDDING_ADA_002"
+  }
+}
+Submit a list of strings to be generated embeddings. Note that JLL GPT embeddings API is not OpenAI compliant and will not work with other libraries/frameworks.
+
+Quick Example
+While the standard JLL GPT is like a general-purpose assistant, a custom assistant could be specifically designed to help with answering your technical questions like our @AskTechSupport with relevant expertise and best practices built in.
+
+Types of Custom Assistants
+General Assistants
+Accessible to all users across the organization, these assistants provide specialized expertise in particular domains:
+
+AskTechSupport - Provides technical support and IT troubleshooting assistance
+AskAzara - Specializes in JLL's Azara platform functionality and data insights
+Account Scoped Assistants
+Built specifically for particular client accounts or projects, with access to account-specific knowledge:
+
+HSBC - Specialized assistant for HSBC account teams and information
+Rolls-Royce - Tailored for Rolls-Royce-specific queries and project data
+Benefits of Custom Assistants
+Custom Assistants offer several advantages over general-purpose AI:
+
+Domain Expertise - Access to specialized knowledge bases and trained for specific use cases
+Contextual Awareness - Better understanding of industry-specific terminology and requirements
+Improved Accuracy - Responses grounded in verified organizational knowledge rather than general information
+Enhanced Security - Can be configured with appropriate access controls for sensitive information
+More detailed information about creating and using Custom Assistants will be available soon.
+
+Data Sources Supported
+The underlying RAG framework supports a wide range of data sources that can be ingested for use by Custom Assistants as their knowledgebase:
+
+Text documents (PDF, Word, HTML, .htm, .txt)
+Excel spreadsheets
+OCR from PowerPoint slides (currently up to 30Mb in size)
+OCR from Images
+These files can either be uploaded directly or via 3rd party BLOB (Azure BLOB storage folders) if you do not want to upload the files but would prefer the RAG framework to create a BLOB storage for you. This way, your files can remain on your own Azure BLOB storage location without having to be copied or moved to a different location.
+
+The following connectors are also provided to enable data ingestion from these sources:
+
+Confluence
+ServiceNow
+ServiceCloud
+ZenDesk
+SharePoint
+In addition, there are also new connectors in the pipeline, to be released over the course of H2-2025:
+
+AWS S3
+Box
+OneDrive (for Business)
+Microsoft 365
+JLL websites
+Salesforce
+Building Effective Agents with JLL GPT
+Introduction and AI Agents Definition
+Since the inception of JLL GPT, going back to August of 2023, we've worked with dozens of teams building LLM agents both at JLL and with some of our clients and partners.
+
+Consistently, the most successful implementations weren't using complex frameworks or specialized libraries. Instead, they were built with simple, composable patterns.
+
+In this post, we share some lessons from the industry and real-life use cases where teams have been building agents and give practical advice for developers on building effective agents.
+
+What are agents? Definitions, marketing perspectives
+No one seems to agree on what an agent is. In some part, that's due to aggressive marketing efforts by the AI vendors (for example, Microsoft rebranding M365 Copilot as "Microsoft AI agents", without adding any new features, or Salesforce rebranding "Einstein Copilot" to "Agentforce"). It seems that by now, most "copilots" in the industry have been rebranded to "agents", often without adding any new "agentic" functionality.
+
+Leading AI vendors' definitions
+To agree on a definition for agents and separate reality from the hype, it's useful to look at how leading AI vendors such as OpenAI and Anthropic define agents in their SDKs.
+
+From the OpenAI Agents SDK: "An agent is a large language model (LLM), configured with instructions and tools."
+
+Other, somewhat vague definitions, include things like "AI applications that can autonomously perform tasks". While these definitions can make sense, it's quite difficult to define what "autonomously" actually means. For example, is a research agent like DeepResearch from OpenAI, Google, Perplexity and more, that gathers data to produce a report, autonomous?
+
+As state-of-the-art AI currently revolves around LLMs, in practice, an agentic AI application typically equates to an application making use of tools ("function calling" in AI engineering terms) based on an LLM parsing some input, based on which it routes the control flow, based on its instructions.
+
+Another useful definition is provided by Anthropic, the company behind the Claude series of models. Anthropic makes an interesting distinction between whether the control flow of the application is orchestrated by predefined rules (workflows) or via an LLM call (agents):
+
+AI Workflows are systems where LLMs and tools are orchestrated through predefined code paths.
+AI Agents, on the other hand, are systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks.
+Agent Archetypes
+Computer-use, Browser-use agents (high generalization)
+These agents are capable of many tasks a human could do on a computer, performing basic actions like clicks and keyboard inputs.
+
+This is demonstrated in manus.im for example, a startup company that has built a wrapper on top of Claude 3.5 Sonnet and browser-use open-source project to create nice workflows to automate a variety of tasks: Manus AI Demo
+
+OpenAI's agent SDK, which contains a few built-in tools for the LLM to call, also includes computer-use tool:
+
+https://platform.openai.com/docs/guides/tools-computer-use
+
+And of course, Anthropic has one too: Anthropic Computer Use Example
+
+Most applications leveraging computer use – Manus AI, Devin, Operator, Convergence AI and more – have been trending for a short while, but over time, the AI community has realized they are not mature enough for most production use cases, due to some of the problems we will discuss on the LLM limitations section below.
+
+Therefore, we do not recommend this approach at the moment.
+
+Tool use agents (medium generalization)
+These agents use mid-level actions that balance flexibility and efficiency, handling tasks like workflow automation and data processing.
+
+A company that has leaned deeply into Tool use agents is Glean, with Glean Agents:
+
+You can also glimpse Glean Agents for Sales use cases here:
+
+Another great agentic product in this archetype is Fyxer AI, which prepares automatic drafts for emails for you, and is claiming to save teams at least 1 hour a day of work by leveraging AI to handle email and calendar related tasks: Fyxer AI Demo
+
+This approach is more reliable than computer-use, but still quite generalizable to many use cases, as a tool/function call could basically mean anything.
+
+Specialized agents (low generalization)
+These orchestrator agents coordinate specialized sub-agents, each optimized for specific tasks like customer support, contract drafting, and engineering debugging.
+
+Examples of this are the JLL GPT Tech Support Agent, which is connected to many data sources from which it can retrieve relevant information, and is designed to submit requests on your behalf for tech support issues: Tech Support Agent Demo
+
+When (and when not) to use agents
+Automation and AI agents, accuracy and monitoring
+People and organizations have been working on automating tasks using customized software, in house applications, no-code platforms, for decades now.
+
+The ability to better understand the input and to more accurately trigger tools based on that understanding greatly enhances our ability to automate processes. This is where AI agents are really changing the game: it's much easier to stitch automations based on inputs.
+
+When building applications with LLMs, we recommend finding the simplest solution possible, and only increasing complexity when needed.
+
+For many applications, optimizing single LLM calls with retrieval and in-context examples is usually enough. In other applications, tool calling may be warranted. And in more rare examples, both routing and tool calling will be required.
+
+Agentic systems often trade latency and cost for better task performance, and you should consider when this tradeoff makes sense.
+
+For example: before LLMs/AI agents, automating a response to a client asking for some information about a real estate property an agent is marketing would typically be rule-based, and as such, less accurate. With LLMs, a broker can use no-code platforms to stitch an end-to-end workflow to respond to clients with accurate information, relying on the LLMs capability to parse the request and call the right tool (e.g. an email sending API).
+
+When this becomes more complicated and potentially impossible to implement, is when accuracy requirements are high. A broker responding to a client with wrong or LLM-hallucinated information can potentially end up in a lawsuit against the company. Therefore, rigorous evaluation and monitoring should be in place.
+
+Depending on the quality bar required from the AI agent, it may be very simple or impossible to implement.
+
+Limitations of AI Agents
+Agents are confined by the limitations of LLMs. As probabilistic pattern matching models, LLMs are very far from offering human-level AI capabilities.
+
+In February 2025, Yann LeCun, Turing-award winner and godfather of AI (the underlying technology of LLMs), stated that not only LLMs are not currently as intelligent as humans, but they will likely not be the path for human-level AI, advising researchers who are interested in developing human level AI models to not work on LLMs.
+
+Basic accuracy and data retrieval issues
+We have used state of the art models with internet access (like Gemini models with built-in Google Search) to ask the following simple question:
+
+"When do the following companies publish their earnings for the entire year of 2024:
+JLL
+CBRE
+Cushman & Wakefield
+Colliers"
+This task basically involves Googling each company's earnings report and picking the first or second result from Google to see the date (the date is sometimes given right there on Google).
+
+The following models, all state of the art, could not answer the question correctly:
+
+Gemini Flash 2.5
+Gemini Flash 2.5 with Thinking
+Some models could provide the right answers, but in real life use cases, one would not know which model to choose in advance.
+
+The wrong answer below provided by some of the models above not only gets the Colliers date wrong, but it also says "confirmed" next to the wrong date, and the Cushman date is missing altogether...
+
+Hallucinations and other limitations
+Lack of understanding of basic mathematical concepts and visuals
+
+Since LLMs are based on probabilistic pattern matching from training on language data, they lack the most basic understanding of mathematical concepts, like counting.
+
+The example below is using the state-of-the-art model o1 pro from OpenAI, which is a leading model in terms of benchmarks and is one of OpenAI's most expensive models to date (not available on the free and plus version). It is not capable of solving counting problems at the level of a 4-year-old:
+
+The below example uses o3-mini-high, the high-intelligence version of a state-of-the-art "reasoning" model from OpenAI:
+
+Hallucinations: an LLM feature, not a bug
+
+A well-known issue with LLMs is their tendency to generate hallucinated content: a sometimes hard-to-pick-up answer to some question which is based on completely made-up data, not grounded in reality.
+
+This is in fact a feature of LLMs, not a bug. Since LLMs are models trained to predict the most likely reasonable token of text based on some input, it is the case that when they generate hallucinated content that might misinform the user, they do so because it's indeed the most likely text to generate based on their training data. This is why it's so difficult (and potentially impossible) to solve this issue.
+
+The following is an example of the OpenAI DeepResearch agent, using O3 – OpenAI's smartest reasoning model to date: The user has asked DeepResearch to analyze the age of authors publishing in the Annals of Mathematics. DeepResearch produced the following:
+
+The table is amazing, the only problem is that it's all made up. Despite claiming to have looked at every paper published in the Annals in this 75-year period, poking around the pages it looked at suggests it only looked at ~5-6 papers.
+
+Frameworks and Design Patterns for Building Agents
+Simplifying agentic systems
+There are many frameworks that make agentic systems easier to implement, including:
+
+LangGraph from LangChain
+Scale AI
+AI Squared
+Xpander AI
+Squid AI
+Amazon Bedrock's AI Agent framework
+Google's Vertex AI Agents Builder
+Glean
+Vellum, another GUI tool for building and testing complex workflows
+Salesforces's Agentforce
+ServiceNow's Moveworks AI
+We have studied all of the above and more. These frameworks make it easy to get started by simplifying standard low-level tasks like calling LLMs, defining and parsing tools, and chaining calls together.
+
+However, they often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug. They can also make it tempting to add complexity when a simpler setup suffices.
+
+We suggest that developers start by using LLM APIs directly with JLL GPT, or lightweight frameworks such as the OpenAI SDK. Many agentic patterns can be implemented in a few lines of code even without any framework. If you do use a framework, ensure you understand the underlying code. Incorrect assumptions about what's under the hood are a common source of customer error.
+
+The OpenAI Agents SDK and JLL GPT
+The OpenAI Agents SDK is a new, lightweight framework compared to LangGraph and LangChain that introduces useful abstractions for developing agentic AI apps, and can be easily used with JLL GPT API. It includes useful abstractions and many nice examples: voice agents, financial assistants, MCP and tools calling, etc. Everything on the API can interoperate with any third-party model provider, like JLL GPT API.
+
+To quickly start building agents with the OpenAI Agents SDK, we have created a cloned and modified version that includes additional files to demonstrate JLL GPT integration.
+
+Examples and integrations
+JLLModelProvider class is added to examples/model_providers
+OpenAI Agents SDK Hello Word: The most basic example is updated to use JLLModelProvider - examples/hello_world.py
+An agent with instructions and tools: an agent to chat with Tomorrow.io API as tool is introduced in examples/tools.py to demonstrate tools calling
+You can use all of the features of the OpenAI SDK except for the Responses API, which only supports native OpenAI services and tools (this includes computer use, files and web search tools). You can implement each of these tools separately from the SDK and trigger them as demonstrated in the examples/tools.py example with the tomorrow.io tool.
+
+Here is a list of examples in each folder from the openai-agents-python repository:
+
+Agent Patterns
+This folder contains examples of common agentic patterns:
+
+Deterministic flows: Example in deterministic.py - breaking tasks into smaller steps where outputs are passed sequentially.
+Handoffs and routing: Example in routing.py - specialized sub-agents handle specific tasks.
+Agents as tools: Example in agents_as_tools.py - agents act as tools rather than taking over conversations.
+LLM-as-a-judge: Example in llm_as_a_judge.py - using a second model to evaluate and improve outputs.
+Parallelization: Example in parallelization.py - running multiple agents simultaneously for efficiency.
+Guardrails: Examples in input_guardrails.py and output_guardrails.py - ensuring valid inputs and outputs using tripwire mechanisms.
+Customer Service
+This folder contains:
+
+Main example: Demonstrated in main.py, showcasing a customer service agent setup.
+Model Providers
+This folder demonstrates the use of non-OpenAI LLM providers:
+
+Custom provider example: Shown in custom_example_provider.py, requiring configuration of base URL, API key, and model name.
+Research Bot
+This folder showcases a multi-agent research bot:
+
+Main example: Implemented in main.py. The bot includes:
+A planner_agent for generating search plans.
+A search_agent for web searches and summarization (executed in parallel).
+A writer_agent for compiling search summaries into a report.
+Further Reading
+There is a great write-up by Anthropic, developer of Claude, about the topic of building effective agents. This includes design patterns and more: https://www.anthropic.com/engineering/building-effective-agents
+
+Conclusion
+Building effective agents usually works best when keeping things simple and modular rather than using overly complex systems. AI agents can mean different things to different people, but generally, they are applications powered by LLMs, where the LLM decides what actions to take based on context, and which third party tools (complex or simple) to call. For this reason, depending on the quality bar required from the AI agent, it may be very simple or impossible to implement.
+
+AI agents make automating tasks easier but need careful oversight due to accuracy challenges, since agents still struggle with issues like hallucinations and basic misunderstandings, which come from the fundamental design of current language models.
+
+Using straightforward approaches, like writing your own code without any framework, or using a lightweight one like the OpenAI SDK, usually gives cleaner and more manageable solutions than more complicated frameworks.
+
+OpenAI Agents SDK and JLL GPT
+The OpenAI Agents SDK is a new, lightweight framework compared to LangGraph and LangChain that introduces useful abstractions for developing agentic AI apps, and can be easily used with JLL GPT API. It includes useful abstractions and many nice examples: voice agents, financial assistants, MCP and tools calling, etc. Everything on the API can interoperate with any third-party model provider, like JLL GPT API.
+
+To quickly start building agents with the OpenAI Agents SDK, we have created a cloned and modified version that includes additional files to demonstrate JLL GPT integration.
+
+Examples and Integrations
+JLLModelProvider class is added to examples/model_providers
+
+OpenAI Agents SDK Hello World Example
+
+The most basic example is updated to use JLLModelProvider - examples/hello_world.py
+
+Agent with Instructions and Tools
+
+An agent to chat with Tomorrow.io API as tool is introduced in examples/tools.py to demonstrate tools calling
+
+You can use all of the features of the OpenAI SDK except for the Responses API, which only supports native OpenAI services and tools (this includes computer use, files and web search tools). You can implement each of these tools separately from the SDK and trigger them as demonstrated in the examples/tools.py example with the tomorrow.io tool.
+
+Example Patterns Gallery
+Here is a list of examples in each folder from the openai-agents-python repository:
+
+Agent Patterns
+This folder contains examples of common agentic patterns:
+
+Deterministic flows: Example in deterministic.py - breaking tasks into smaller steps where outputs are passed sequentially.
+Handoffs and routing: Example in routing.py - specialized sub-agents handle specific tasks.
+Agents as tools: Example in agents_as_tools.py - agents act as tools rather than taking over conversations.
+LLM-as-a-judge: Example in llm_as_a_judge.py - using a second model to evaluate and improve outputs.
+Parallelization: Example in parallelization.py - running multiple agents simultaneously for efficiency.
+Guardrails: Examples in input_guardrails.py and output_guardrails.py - ensuring valid inputs and outputs using tripwire mechanisms.
+Customer Service
+This folder contains:
+
+Main example: Demonstrated in main.py, showcasing a customer service agent setup.
+Model Providers
+This folder demonstrates the use of non-OpenAI LLM providers:
+
+Custom provider example: Shown in custom_example_provider.py, requiring configuration of base URL, API key, and model name.
+Research Bot
+This folder showcases a multi-agent research bot:
+
+Main example: Implemented in main.py. The bot includes:
+A planner_agent for generating search plans.
+A search_agent for web searches and summarization (executed in parallel).
+A writer_agent for compiling search summaries into a report.
+Resources
+Learn more about the OpenAI Agents SDK:
+
+Official Documentation
+Examples Repository
+Langchain Integration
+Langchain is a popular framework for developing applications powered by language models. It provides a comprehensive set of tools and abstractions for building complex AI applications. This section demonstrates how to integrate JLL GPT with Langchain to leverage its powerful features.
+
+When to Use Langchain
+Complex Workflows: When you need to chain multiple LLM operations together in a structured way
+Document Processing: When working with large document collections that need embedding, chunking, and semantic search
+Memory Management: When your application requires conversation history or state management across interactions
+Tool Integration: When you need to combine LLM capabilities with external tools and APIs in a systematic way
+Structured Output: When you need consistent parsing of LLM outputs into specific formats or data structures
+When Not to Use Langchain
+Simple Applications: For basic chat or completion tasks, direct API calls are clearer and more maintainable
+Performance-Critical Systems: Langchain's abstractions can add overhead that might not be acceptable in latency-sensitive applications
+Small-Scale Projects: The framework's complexity might be overkill for simple projects with limited LLM functionality
+Prototype Development: During rapid prototyping, using raw API calls can be faster and more flexible
+Custom Workflows: When you need fine-grained control over the LLM interaction that doesn't fit Langchain's patterns
+For setup, refer to the JLL GPT Langchain examples.
+
+CrewAI Integration
+CrewAI is a framework for orchestrating role-playing autonomous AI agents. It enables the creation of agent teams that work together to accomplish complex tasks, with each agent having specific roles, goals, and tools. CrewAI is designed to facilitate more human-like collaboration patterns among AI agents, making it particularly effective for tasks that require multiple perspectives or specialized expertise.
+
+When to Use CrewAI
+Complex Problem Solving: When tasks require multiple perspectives or expertise areas working together (e.g., software development teams, research teams)
+Role-Based Workflows: When you need agents to take on specific roles with clear responsibilities (e.g., product manager, developer, QA engineer)
+Sequential Task Processing: When tasks need to flow through different specialists in a defined order
+Collaborative Decision Making: When decisions benefit from multiple agents discussing and refining solutions
+Expert System Simulation: When you want to simulate human expert teams and their interaction patterns
+When Not to Use CrewAI
+Simple Tasks: For straightforward tasks that don't require multiple perspectives or expertise areas
+Real-Time Applications: When immediate responses are required, as multi-agent coordination adds latency
+Resource-Constrained Environments: When computational resources or API costs need to be minimized, as multiple agents increase resource usage
+Independent Tasks: When tasks don't benefit from collaboration or can be handled by a single agent effectively
+Highly Structured Data Processing: For tasks that are purely algorithmic or data processing without need for creative problem-solving
+For setup, refer to the JLL GPT CrewAI examples.'
 
 
 
 
 
+JLL Technologies Logo
+JLL LLM Gateway APIs
+
+Open SearchSearch
+Keyboard Shortcut:CTRL⌃ k
+
+Introduction
+
+Open Introduction
+
+model management
+Close Group
+
+Model List
+HTTP Method: GET
+
+Model List
+HTTP Method: GET
+
+Model Info
+HTTP Method: GET
+
+Model Info
+HTTP Method: GET
+
+Model Info V1
+HTTP Method: GET
+
+Model Info V1
+HTTP Method: GET
+
+Model Group Info
+HTTP Method: GET
+
+Public Model Hub
+HTTP Method: GET
+
+Public Model Hub Info
+HTTP Method: GET
+
+Get Litellm Model Cost Map
+HTTP Method: GET
+
+Patch Model
+HTTP Method: PATCH
+
+chat/completions
+Close Group
+
+Chat Completion
+HTTP Method: POST
+
+Chat Completion
+HTTP Method: POST
+
+Chat Completion
+HTTP Method: POST
+
+Chat Completion
+HTTP Method: POST
+
+completions
+Close Group
+
+Completion
+HTTP Method: POST
+
+Completion
+HTTP Method: POST
+
+Completion
+HTTP Method: POST
+
+Completion
+HTTP Method: POST
+
+embeddings
+Open Group
+
+moderations
+Open Group
+
+audio
+Open Group
+
+assistants
+Open Group
+
+llm utils
+Open Group
+
+responses
+Close Group
+
+Responses Api
+HTTP Method: POST
+
+Cursor Chat Completions
+HTTP Method: POST
+
+Get Response
+HTTP Method: GET
+
+Delete Response
+HTTP Method: DEL
+
+Get Response
+HTTP Method: GET
+
+Delete Response
+HTTP Method: DEL
+
+Get Response
+HTTP Method: GET
+
+Delete Response
+HTTP Method: DEL
+
+Get Response Input Items
+HTTP Method: GET
+
+Get Response Input Items
+HTTP Method: GET
+
+Get Response Input Items
+HTTP Method: GET
+
+Compact Response
+HTTP Method: POST
+
+Compact Response
+HTTP Method: POST
+
+Compact Response
+HTTP Method: POST
+
+Cancel Response
+HTTP Method: POST
+
+Cancel Response
+HTTP Method: POST
+
+Cancel Response
+HTTP Method: POST
+
+WebSocket
+Open Group
+
+batch
+Open Group
+
+public
+Open Group
+
+providers
+Open Group
+
+rerank
+Open Group
+
+ocr
+Open Group
+
+videos
+Open Group
+
+containers
+Open Group
+
+search
+Open Group
+
+images
+Open Group
+
+fine-tuning
+Open Group
+
+credential management
+Open Group
+
+OpenAI Evals API
+Open Group
+
+health
+Open Group
+
+Internal User management
+Open Group
+
+Budget & Spend Tracking
+Open Group
+
+Guardrails
+Close Group
+
+List Guardrails V2
+HTTP Method: GET
+
+Create Guardrail
+HTTP Method: POST
+
+utils
+Open Group
+
+Policies
+Open Group
+
+Search Tools
+Open Group
+
+Prompt Management
+Open Group
+
+files
+Open Group
+
+Home
+HTTP Method: GET
+
+Get Routes
+HTTP Method: GET
+
+Index Create
+HTTP Method: POST
+
+Get Robots
+HTTP Method: GET
+
+Get Ui Config
+HTTP Method: GET
+
+Models
+Close Group
+
+APIKeySecurityScheme
+
+AccessControl_UI_AccessMode
+
+AccessGroupCreateRequest
+
+AccessGroupInfo
+
+AccessGroupResponse
+
+AccessGroupUpdateRequest
+
+ActiveUsersAnalyticsResponse
+
+AddTeamCallback
+
+AgentCapabilities
+
+AgentCard
+
+AgentCard
+
+AgentCardSignature
+
+AgentConfig
+
+AgentCreateInfo
+
+AgentCredentialField
+
+AgentExtension
+
+AgentInterface
+
+AgentMakePublicResponse
+
+AgentObjectPermission
+
+AgentProvider
+
+AgentResponse
+
+AgentSkill
+
+AllowedVectorStoreIndexItem
+
+ApplyGuardrailRequest
+
+ApplyGuardrailResponse
+
+AttachmentImpactResponse
+
+AuditLogResponse
+
+BaseLitellmParams
+
+BaseLitellmParams
+
+BaseModel
+
+BlockKeyRequest
+
+BlockTeamRequest
+
+BlockUsers
+
+BlockedWord
+
+BlogPost
+
+BlogPostsResponse
+
+Body_audio_transcriptions_audio_transcriptions_post
+
+Body_audio_transcriptions_v1_audio_transcriptions_post
+
+Body_convert_prompt_file_to_json_utils_dotprompt_json_converter_post
+
+Body_create_file__provider__v1_files_post
+
+Body_create_file_files_post
+
+Body_create_file_v1_files_post
+
+Body_image_edit_api_images_edits_post
+
+Body_image_edit_api_openai_deployments__model__images_edits_post
+
+Body_image_edit_api_v1_images_edits_post
+
+Body_test_model_connection_health_test_connection_post
+
+Body_token_endpoint__mcp_server_name__token_post
+
+Body_token_endpoint_token_post
+
+Body_upload_logo_upload_logo_post
+
+Body_video_generation_v1_videos_post
+
+Body_video_generation_videos_post
+
+BreakdownMetrics
+
+BreakdownMetrics
+
+BudgetConfig
+
+BudgetDeleteRequest
+
+BudgetNewRequest
+
+BudgetRequest
+
+BulkTeamMemberAddRequest
+
+BulkTeamMemberAddResponse
+
+BulkUpdateKeyRequest
+
+BulkUpdateKeyRequestItem
+
+BulkUpdateKeyResponse
+
+BulkUpdateUserRequest
+
+BulkUpdateUserResponse
+
+CachePingResponse
+
+CacheSettingsField
+
+CacheSettingsResponse
+
+CacheSettingsUpdateRequest
+
+CacheTestRequest
+
+CacheTestResponse
+
+CallTypes
+
+CallbacksByType
+
+CancelEvalResponse
+
+CancelRunResponse
+
+ChatCompletionAnnotation
+
+ChatCompletionAnnotationURLCitation
+
+ChatCompletionAssistantMessage
+
+ChatCompletionAssistantToolCall
+
+ChatCompletionAudioObject
+
+ChatCompletionAudioResponse
+
+ChatCompletionCachedContent
+
+ChatCompletionDeveloperMessage
+
+ChatCompletionDocumentObject
+
+ChatCompletionFileObject
+
+ChatCompletionFileObjectFile
+
+ChatCompletionFunctionMessage
+
+ChatCompletionImageObject
+
+ChatCompletionImageUrlObject
+
+ChatCompletionMessageToolCall
+
+ChatCompletionRedactedThinkingBlock
+
+ChatCompletionSystemMessage
+
+ChatCompletionTextObject
+
+ChatCompletionThinkingBlock
+
+ChatCompletionTokenLogprob
+
+ChatCompletionToolCallChunk
+
+ChatCompletionToolCallFunctionChunk
+
+ChatCompletionToolMessage
+
+ChatCompletionToolParam
+
+ChatCompletionToolParamFunctionChunk
+
+ChatCompletionUserMessage
+
+ChatCompletionVideoObject
+
+ChatCompletionVideoUrlObject
+
+ChatMessage
+
+ChoiceLogprobs
+
+Choices
+
+CitationsObject
+
+CloudZeroExportRequest
+
+CloudZeroExportResponse
+
+CloudZeroInitRequest
+
+CloudZeroInitResponse
+
+CloudZeroSettingsUpdate
+
+CloudZeroSettingsView
+
+ComplianceCheckRequest
+
+ComplianceCheckResult
+
+ComplianceResponse
+
+ConfigOverrideSettingsResponse
+
+ConfigurableClientsideParamsCustomAuth
+
+ConfigurableClientsideParamsCustomAuth
+
+ContentFilterAction
+
+ContentFilterCategoryConfig
+
+ContentFilterPattern
+
+CostEstimateRequest
+
+CostEstimateResponse
+
+CreateCredentialItem
+
+CreateGuardrailRequest
+
+CreateJWTKeyMappingRequest
+
+CreateSearchToolRequest
+
+CredentialItem
+
+DailySpendData
+
+DailySpendData
+
+DailySpendMetadata
+
+DefaultInternalUserParams
+
+DefaultTeamSSOParams
+
+DefaultTeamSettingsResponse
+
+DeleteCustomerRequest
+
+DeleteEvalResponse
+
+DeleteJWTKeyMappingRequest
+
+DeleteModelGroupResponse
+
+DeleteOrganizationRequest
+
+DeleteProjectRequest
+
+DeleteSkillResponse
+
+DeleteTeamRequest
+
+DeleteUserRequest
+
+Deployment
+
+DistinctTagResponse
+
+DistinctTagsResponse
+
+DocumentObject
+
+EmailEvent
+
+EmailEventSettings
+
+EmailEventSettingsResponse
+
+EmailEventSettingsUpdateRequest
+
+EndpointProvider
+
+EnrichTemplateRequest
+
+ErrorResponse
+
+Eval
+
+FailedKeyUpdate
+
+FallbackCreateRequest
+
+FallbackDeleteResponse
+
+FallbackGetResponse
+
+FallbackResponse
+
+FunctionCall
+
+GUARDRAIL_DEFINITION_LOCATION
+
+GenerateKeyRequest
+
+GenerateKeyResponse
+
+GenericGuardrailAPIInputs
+
+GetTeamMemberPermissionsResponse
+
+GraySwanGuardrailConfigModelOptionalParams
+
+Guardrail
+
+GuardrailInfoResponse
+
+GuardrailInfoResponse
+
+GuardrailSubmissionItem
+
+GuardrailSubmissionSummary
+
+GuardrailTestResultEntry
+
+HTTPAuthSecurityScheme
+
+HTTPValidationError
+
+HashicorpVaultConfig
+
+Hyperparameters
+
+IPAddress
+
+ImageURLListItem
+
+ImageURLObject
+
+InProductNudgeResponse
+
+IndexCreateLiteLLMParams
+
+IndexCreateRequest
+
+InputAudio
+
+InternalUserSettingsResponse
+
+JWTKeyMappingResponse
+
+KeyHealthResponse
+
+KeyListResponseObject
+
+KeyManagementRoutes
+
+KeyMetadata
+
+KeyMetricWithMetadata
+
+KeyRequest
+
+LakeraCategoryThresholds
+
+ListAccessGroupsResponse
+
+ListEvalsResponse
+
+ListGuardrailSubmissionsResponse
+
+ListGuardrailsResponse
+
+ListPluginsResponse
+
+ListPromptsResponse
+
+ListRunsResponse
+
+ListSearchToolsResponse
+
+ListSkillsResponse
+
+LiteLLMFineTuningJobCreate
+
+LiteLLMKeyType
+
+LiteLLM_BudgetTable
+
+LiteLLM_DeletedTeamTable
+
+LiteLLM_DeletedTeamTable
+
+LiteLLM_DeletedVerificationToken
+
+LiteLLM_EndUserTable
+
+LiteLLM_MCPServerTable
+
+LiteLLM_ManagedVectorStore
+
+LiteLLM_ManagedVectorStoreListResponse
+
+LiteLLM_ManagedVectorStoresTable
+
+LiteLLM_ModelTable
+
+LiteLLM_ModelTable
+
+LiteLLM_ObjectPermissionBase
+
+LiteLLM_ObjectPermissionTable
+
+LiteLLM_OrganizationMembershipTable
+
+LiteLLM_OrganizationTableWithMembers
+
+LiteLLM_Params
+
+LiteLLM_ProjectTable
+
+LiteLLM_SpendLogs
+
+LiteLLM_SpendLogs
+
+LiteLLM_TeamMembership
+
+LiteLLM_TeamTable
+
+LiteLLM_TeamTable
+
+LiteLLM_ToolTableRow
+
+LiteLLM_UserTable
+
+LiteLLM_UserTable
+
+LiteLLM_UserTableWithKeyCount
+
+LiteLLM_UserTableWithKeyCount
+
+LiteLLM_VerificationToken
+
+LitellmParams
+
+LitellmUserRoles
+
+LoggingCallbackStatus
+
+MCPCredentials
+
+MCPOAuthUserCredentialRequest
+
+MCPOAuthUserCredentialStatus
+
+MCPPublicServer
+
+MCPSemanticFilterSettings
+
+MCPSemanticFilterSettingsResponse
+
+MCPSubmissionsSummary
+
+MCPUserCredentialListItem
+
+MCPUserCredentialRequest
+
+MCPUserCredentialResponse
+
+MakeAgentsPublicRequest
+
+MakeMCPServersPublicRequest
+
+Member
+
+Message
+
+MetricWithMetadata
+
+MetricWithMetadata
+
+Mode
+
+ModelGroupInfoProxy
+
+ModelGroupInfoProxy
+
+ModelInfo
+
+ModelInfoDelete
+
+ModelResponse
+
+MutualTLSSecurityScheme
+
+NewCustomerRequest
+
+NewMCPServerRequest
+
+NewModelGroupRequest
+
+NewModelGroupResponse
+
+NewOrganizationRequest
+
+NewOrganizationResponse
+
+NewProjectRequest
+
+NewProjectResponse
+
+NewTeamRequest
+
+NewUserRequest
+
+NewUserRequestTeam
+
+NewUserResponse
+
+OAuth2SecurityScheme
+
+OAuthFlows
+
+OpenIdConnectSecurityScheme
+
+OrgMember
+
+OrganizationAddMemberResponse
+
+OrganizationMemberAddRequest
+
+OrganizationMemberDeleteRequest
+
+OrganizationMemberUpdateRequest
+
+OrganizationRequest
+
+PaginatedAuditLogResponse
+
+PassThroughEndpointResponse
+
+PassThroughGenericEndpoint
+
+PassThroughGuardrailSettings
+
+PatchAgentRequest
+
+PatchGuardrailRequest
+
+PatchPromptRequest
+
+PerTestingCriteriaResult
+
+PerUserAnalyticsResponse
+
+PerUserMetrics
+
+PiiAction
+
+PiiEntityType
+
+PipelineTestRequest
+
+PluginAuthor
+
+PluginListItem
+
+PolicyAttachmentCreateRequest
+
+PolicyAttachmentDBResponse
+
+PolicyAttachmentListResponse
+
+PolicyConditionRequest
+
+PolicyCreateRequest
+
+PolicyDBResponse
+
+PolicyGuardrailsResponse
+
+PolicyInfoResponse
+
+PolicyListDBResponse
+
+PolicyListResponse
+
+PolicyMatchContext
+
+PolicyMatchDetail
+
+PolicyResolveRequest
+
+PolicyResolveResponse
+
+PolicyScopeResponse
+
+PolicySummaryItem
+
+PolicyTestResponse
+
+PolicyUpdateRequest
+
+PolicyValidateRequest
+
+PolicyValidationError
+
+PolicyValidationErrorType
+
+PolicyValidationResponse
+
+PolicyVersionCompareResponse
+
+PolicyVersionCreateRequest
+
+PolicyVersionListResponse
+
+PolicyVersionStatusUpdateRequest
+
+Prompt
+
+PromptInfo
+
+PromptInfoResponse
+
+PromptLiteLLMParams
+
+PromptSpec
+
+PromptTemplateBase
+
+PromptTokensDetails
+
+ProviderBudgetResponse
+
+ProviderBudgetResponseObject
+
+ProviderCreateInfo
+
+ProviderCredentialField
+
+PublicModelHubInfo
+
+RawRequestTypedDict
+
+RealtimeClientSecretResponse
+
+RegenerateKeyRequest
+
+RegisterGuardrailRequest
+
+RegisterGuardrailResponse
+
+RegisterPluginRequest
+
+RejectMCPServerRequest
+
+ResetSpendRequest
+
+ResponseLiteLLM_ManagedVectorStore
+
+ResultCounts
+
+RoleMappings
+
+RouterFieldsResponse
+
+RouterSettingsField
+
+RouterSettingsResponse
+
+Run
+
+RunDeleteResponse
+
+SCIMFeature
+
+SCIMGroup
+
+SCIMListResponse
+
+SCIMMember
+
+SCIMPatchOp
+
+SCIMPatchOperation
+
+SCIMServiceProviderConfig
+
+SCIMUser
+
+SCIMUserEmail
+
+SCIMUserGroup
+
+SCIMUserName
+
+SSOConfig
+
+SSOSettingsResponse
+
+SearchTool
+
+SearchToolInfoResponse
+
+SearchToolLiteLLMParams
+
+Skill
+
+SpendAnalyticsPaginatedResponse
+
+SpendCalculateRequest
+
+SpendMetrics
+
+SuccessfulKeyUpdate
+
+SuggestTemplatesRequest
+
+SupportedEndpoint
+
+SupportedEndpointsResponse
+
+TagActiveUsersResponse
+
+TagDeleteRequest
+
+TagInfoRequest
+
+TagNewRequest
+
+TagSummaryMetrics
+
+TagSummaryResponse
+
+TagUpdateRequest
+
+TeamAddMemberResponse
+
+TeamListResponse
+
+TeamMappings
+
+TeamMemberAddRequest
+
+TeamMemberAddResult
+
+TeamMemberDeleteRequest
+
+TeamMemberUpdateRequest
+
+TeamMemberUpdateResponse
+
+TeamModelAddRequest
+
+TeamModelDeleteRequest
+
+TestCustomCodeGuardrailRequest
+
+TestCustomCodeGuardrailResponse
+
+TestPoliciesAndGuardrailsRequest
+
+TestPolicyTemplateRequest
+
+TestPolicyTemplateResponse
+
+TestPromptRequest
+
+TestSearchToolConnectionRequest
+
+TokenCountDetailsResponse
+
+TokenCountRequest
+
+TokenCountResponse
+
+ToolDetailResponse
+
+ToolListResponse
+
+ToolPermissionRule
+
+ToolPolicyOption
+
+ToolPolicyOptionsResponse
+
+ToolPolicyOverrideRow
+
+ToolPolicyUpdateRequest
+
+ToolPolicyUpdateResponse
+
+ToolUsageLogEntry
+
+ToolUsageLogsResponse
+
+TopLogprob
+
+TransformRequestBody
+
+UISettings
+
+UISettingsResponse
+
+UIThemeConfig
+
+UIThemeSettingsResponse
+
+UiDiscoveryEndpoints
+
+UpdateCustomerRequest
+
+UpdateGuardrailRequest
+
+UpdateJWTKeyMappingRequest
+
+UpdateKeyRequest
+
+UpdateMCPServerRequest
+
+UpdateModelGroupRequest
+
+UpdateProjectRequest
+
+UpdatePublicModelGroupsRequest
+
+UpdateRouterConfig
+
+UpdateSearchToolRequest
+
+UpdateTeamMemberPermissionsRequest
+
+UpdateTeamRequest
+
+UpdateUsefulLinksRequest
+
+UpdateUserRequest
+
+UpdateUserRequestNoUserIDorEmail
+
+UsageAIChatRequest
+
+UsageDetailResponse
+
+UsageLogEntry
+
+UsageLogsResponse
+
+UsageOverviewResponse
+
+UsageOverviewRow
+
+UserAPIKeyAuth
+
+UserInfoResponse
+
+UserInfoV2Response
+
+UserListResponse
+
+UserUpdateResult
+
+ValidationError
+
+VantageDryRunRequest
+
+VantageExportRequest
+
+VantageExportResponse
+
+VantageInitRequest
+
+VantageInitResponse
+
+VantageSettingsUpdate
+
+VantageSettingsView
+
+VectorStoreDeleteRequest
+
+VectorStoreInfoRequest
+
+VectorStoreUpdateRequest
+
+updateDeployment
+
+updateLiteLLMParams
+
+ProxyChatCompletionRequest
+
+EmbeddingRequest
+v1.82.3
+OAS 3.1.0
+JLL LLM Gateway API
+
+Download OpenAPI Document
+
+Download OpenAPI Document
+JLL LLM Gateway is an OpenAI-compatible proxy. Use this API to integrate with 100+ LLM providers (OpenAI, Azure OpenAI, Anthropic, etc.) through a single unified interface.
+
+Overview
+
+OpenAI-compatible endpoints: /chat/completions, /embeddings, /models, /completions, and more
+Unified interface across multiple model providers
+Base URL (UAT): https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway
+Base URL (Prod): https://api-llmgateway.jll.com
+Authentication
+All endpoints require both headers:
+
+x-litellm-api-key: <your-api-key>
+subscription-key: <your-subscription-key>
+authorization: Bearer <your-okta-token>
+Obtain your API key and subscription key from the LLM Gateway admin, and your Okta bearer token via your Okta session. Include all three headers in every request.
+
+Error Handling
+LiteLLM returns errors in OpenAI-compatible format:
+
+{
+  "error": {
+    "message": "Error description",
+    "type": "invalid_request_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+Status Code	Meaning	Action
+400	Bad Request – invalid parameters or model	Check request body and parameters
+401	Unauthorized – missing or invalid API key	Verify your API key
+403	Forbidden – valid key but insufficient permissions	Contact admin for access
+404	Not Found – model or resource does not exist	Verify model name or endpoint
+429	Too Many Requests – rate limit exceeded	Retry with exponential backoff
+500	Internal Server Error	Retry once, then contact support
+Rate Limiting
+Requests are rate-limited per API key. When you receive HTTP 429, retry with exponential backoff.
+
+Server
+Server:
+https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev
+DEV
 
 
+Authentication
+SelectAuth Type
+No authentication selected
+Client Libraries
+Shell Curl
+model management ​Copy link
+model managementOperations
+get
+/models
+get
+/v1/models
+get
+/models/{model_id}
+get
+/v1/models/{model_id}
+get
+/v1/model/info
+get
+/model/info
+get
+/model_group/info
+get
+/public/model_hub
+get
+/public/model_hub/info
+get
+/public/litellm_model_cost_map
+patch
+/model/{model_id}/update
+Model List​Copy link
+Use /model/info - to get detailed model information, example - pricing, mode, etc.
+
+This is just for compatibility with openai projects like aider.
+
+Query Parameters:
+
+include_metadata: Include additional metadata in the response with fallback information
+fallback_type: Type of fallbacks to include ("general", "context_window", "content_policy") Defaults to "general" when include_metadata=true
+scope: Optional scope parameter. Currently only accepts "expand". When scope=expand is passed, proxy admins, team admins, and org admins will receive all proxy models as if they are a proxy admin.
+Query Parameters
+return_wildcard_routesCopy link to return_wildcard_routes
+Type:boolean · Return Wildcard Routes
+nullable
+Default
+team_idCopy link to team_id
+Type:string · Team Id
+nullable
+include_model_access_groupsCopy link to include_model_access_groups
+Type:boolean · Include Model Access Groups
+nullable
+Default
+only_model_access_groupsCopy link to only_model_access_groups
+Type:boolean · Only Model Access Groups
+nullable
+Default
+include_metadataCopy link to include_metadata
+Type:boolean · Include Metadata
+nullable
+Default
+fallback_typeCopy link to fallback_type
+Type:string · Fallback Type
+nullable
+scopeCopy link to scope
+Type:string · Scope
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/models
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/models \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
+Test Request
+(get /models)
+Status:200
+Status:422
+null
+Successful Response
+
+Model List​Copy link
+Use /model/info - to get detailed model information, example - pricing, mode, etc.
+
+This is just for compatibility with openai projects like aider.
+
+Query Parameters:
+
+include_metadata: Include additional metadata in the response with fallback information
+fallback_type: Type of fallbacks to include ("general", "context_window", "content_policy") Defaults to "general" when include_metadata=true
+scope: Optional scope parameter. Currently only accepts "expand". When scope=expand is passed, proxy admins, team admins, and org admins will receive all proxy models as if they are a proxy admin.
+Query Parameters
+return_wildcard_routesCopy link to return_wildcard_routes
+Type:boolean · Return Wildcard Routes
+nullable
+Default
+team_idCopy link to team_id
+Type:string · Team Id
+nullable
+include_model_access_groupsCopy link to include_model_access_groups
+Type:boolean · Include Model Access Groups
+nullable
+Default
+only_model_access_groupsCopy link to only_model_access_groups
+Type:boolean · Only Model Access Groups
+nullable
+Default
+include_metadataCopy link to include_metadata
+Type:boolean · Include Metadata
+nullable
+Default
+fallback_typeCopy link to fallback_type
+Type:string · Fallback Type
+nullable
+scopeCopy link to scope
+Type:string · Scope
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/v1/models
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/models \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
+Test Request
+(get /v1/models)
+Status:200
+Status:422
+null
+Successful Response
+
+Model Info​Copy link
+Retrieve information about a specific model accessible to your API key.
+
+Returns model details only if the model is available to your API key/team. Returns 404 if the model doesn't exist or is not accessible.
+
+Follows OpenAI API specification for individual model retrieval. https://platform.openai.com/docs/api-reference/models/retrieve
+
+Path Parameters
+model_idCopy link to model_id
+Type:string · Model Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/models/{model_id}
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/models/{model_id}' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
+Test Request
+(get /models/{model_id})
+Status:200
+Status:422
+null
+Successful Response
+
+Model Info​Copy link
+Retrieve information about a specific model accessible to your API key.
+
+Returns model details only if the model is available to your API key/team. Returns 404 if the model doesn't exist or is not accessible.
+
+Follows OpenAI API specification for individual model retrieval. https://platform.openai.com/docs/api-reference/models/retrieve
+
+Path Parameters
+model_idCopy link to model_id
+Type:string · Model Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/v1/models/{model_id}
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/models/{model_id}' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
+Test Request
+(get /v1/models/{model_id})
+Status:200
+Status:422
+null
+Successful Response
+
+Model Info V1​Copy link
+Provides more info about each model in /models, including config.yaml descriptions (except api key and api base)
+
+Parameters: litellm_model_id: Optional[str] = None (this is the value of x-litellm-model-id returned in response headers)
+
+- When litellm_model_id is passed, it will return the info for that specific model
+- When litellm_model_id is not passed, it will return the info for all models
+Returns: Returns a dictionary containing information about each model.
+
+Example Response:
+
+{
+    "data": [
+                {
+                    "model_name": "fake-openai-endpoint",
+                    "litellm_params": {
+                        "api_base": "https://exampleopenaiendpoint-production.up.railway.app/",
+                        "model": "openai/fake"
+                    },
+                    "model_info": {
+                        "id": "112f74fab24a7a5245d2ced3536dd8f5f9192c57ee6e332af0f0512e08bed5af",
+                        "db_model": false
+                    }
+                }
+            ]
+}
+
+Query Parameters
+litellm_model_idCopy link to litellm_model_id
+Type:string · Litellm Model Id
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/v1/model/info
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/model/info \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
+Test Request
+(get /v1/model/info)
+Status:200
+Status:422
+null
+Successful Response
+
+Model Info V1​Copy link
+Provides more info about each model in /models, including config.yaml descriptions (except api key and api base)
+
+Parameters: litellm_model_id: Optional[str] = None (this is the value of x-litellm-model-id returned in response headers)
+
+- When litellm_model_id is passed, it will return the info for that specific model
+- When litellm_model_id is not passed, it will return the info for all models
+Returns: Returns a dictionary containing information about each model.
+
+Example Response:
+
+{
+    "data": [
+                {
+                    "model_name": "fake-openai-endpoint",
+                    "litellm_params": {
+                        "api_base": "https://exampleopenaiendpoint-production.up.railway.app/",
+                        "model": "openai/fake"
+                    },
+                    "model_info": {
+                        "id": "112f74fab24a7a5245d2ced3536dd8f5f9192c57ee6e332af0f0512e08bed5af",
+                        "db_model": false
+                    }
+                }
+            ]
+}
+
+Query Parameters
+litellm_model_idCopy link to litellm_model_id
+Type:string · Litellm Model Id
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/model/info
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/model/info \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
+Test Request
+(get /model/info)
+Status:200
+Status:422
+null
+Successful Response
+
+Model Group Info​Copy link
+Get information about all the deployments on litellm proxy, including config.yaml descriptions (except api key and api base)
+
+/model_group/info returns all model groups. End users of proxy should use /model_group/info since those models will be used for /chat/completions, /embeddings, etc.
+/model_group/info?model_group=rerank-english-v3.0 returns all model groups for a specific model group (model_name in config.yaml)
+Example Request (All Models):
+
+curl -X 'GET'     'http://localhost:4000/model_group/info'     -H 'accept: application/json'     -H 'x-api-key: sk-1234'
+Example Request (Specific Model Group):
+
+curl -X 'GET'     'http://localhost:4000/model_group/info?model_group=rerank-english-v3.0'     -H 'accept: application/json'     -H 'Authorization: Bearer sk-1234'
+Example Request (Specific Wildcard Model Group): (e.g. model_name: openai/* on config.yaml)
+
+curl -X 'GET'     'http://localhost:4000/model_group/info?model_group=openai/tts-1'
+-H 'accept: application/json'     -H 'Authorization: Bearersk-1234'
+Learn how to use and set wildcard models here
+
+Example Response:
+
+    {
+        "data": [
+            {
+            "model_group": "rerank-english-v3.0",
+            "providers": [
+                "cohere"
+            ],
+            "max_input_tokens": null,
+            "max_output_tokens": null,
+            "input_cost_per_token": 0.0,
+            "output_cost_per_token": 0.0,
+            "mode": null,
+            "tpm": null,
+            "rpm": null,
+            "supports_parallel_function_calling": false,
+            "supports_vision": false,
+            "supports_function_calling": false,
+            "supported_openai_params": [
+                "stream",
+                "temperature",
+                "max_tokens",
+                "logit_bias",
+                "top_p",
+                "frequency_penalty",
+                "presence_penalty",
+                "stop",
+                "n",
+                "extra_headers"
+            ]
+            },
+            {
+            "model_group": "gpt-3.5-turbo",
+            "providers": [
+                "openai"
+            ],
+            "max_input_tokens": 16385.0,
+            "max_output_tokens": 4096.0,
+            "input_cost_per_token": 1.5e-06,
+            "output_cost_per_token": 2e-06,
+            "mode": "chat",
+            "tpm": null,
+            "rpm": null,
+            "supports_parallel_function_calling": false,
+            "supports_vision": false,
+            "supports_function_calling": true,
+            "supported_openai_params": [
+                "frequency_penalty",
+                "logit_bias",
+                "logprobs",
+                "top_logprobs",
+                "max_tokens",
+                "max_completion_tokens",
+                "n",
+                "presence_penalty",
+                "seed",
+                "stop",
+                "stream",
+                "stream_options",
+                "temperature",
+                "top_p",
+                "tools",
+                "tool_choice",
+                "function_call",
+                "functions",
+                "max_retries",
+                "extra_headers",
+                "parallel_tool_calls",
+                "response_format"
+            ]
+            },
+            {
+            "model_group": "llava-hf",
+            "providers": [
+                "openai"
+            ],
+            "max_input_tokens": null,
+            "max_output_tokens": null,
+            "input_cost_per_token": 0.0,
+            "output_cost_per_token": 0.0,
+            "mode": null,
+            "tpm": null,
+            "rpm": null,
+            "supports_parallel_function_calling": false,
+            "supports_vision": true,
+            "supports_function_calling": false,
+            "supported_openai_params": [
+                "frequency_penalty",
+                "logit_bias",
+                "logprobs",
+                "top_logprobs",
+                "max_tokens",
+                "max_completion_tokens",
+                "n",
+                "presence_penalty",
+                "seed",
+                "stop",
+                "stream",
+                "stream_options",
+                "temperature",
+                "top_p",
+                "tools",
+                "tool_choice",
+                "function_call",
+                "functions",
+                "max_retries",
+                "extra_headers",
+                "parallel_tool_calls",
+                "response_format"
+            ]
+            }
+        ]
+        }
+Query Parameters
+model_groupCopy link to model_group
+Type:string · Model Group
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/model_group/info
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/model_group/info \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
 
 
-•	Requirements Document
-•	Finance Data Dictionary Interactive Portal (HTML + AI Enabled)
-•	1. Project Overview
-•	
-•	Create a single-page responsive HTML application that acts as an interactive Finance Data Dictionary portal based on the sanitized Finance Data Dictionary workbook.
-•	
-•	The application will be deployed as a static HTML solution on a Shared Drive and accessible by Finance, Operations, Reporting, and Support teams.
-•	
-•	Primary objectives:
-•	
-•	Visualize Finance ChartFields in an easy-to-understand poster format.
-•	Provide interactive ChartField validation.
-•	Provide Finance terminology lookup.
-•	Provide ChartField hierarchy/tree exploration.
-•	Enable future AI-powered Finance Assistant using JLL API framework.
-•	No database required initially.
-•	Data source will be Excel workbook maintained on Shared Drive.
-•	2. Technology Stack
-•	Phase 1
-•	
-•	Frontend:
-•	
-•	HTML5
-•	CSS3
-•	Bootstrap 5
-•	JavaScript
-•	jQuery
-•	
-•	Data Source:
-•	
-•	Excel Workbook
-•	JSON generated from workbook tabs
-•	
-•	Hosting:
-•	
-•	Shared Drive
-•	
-•	Example:
-•	
-•	Plain Text
-•	\\SharedDrive\FinanceDictionary\
-•	index.html
-•	css\
-•	js\
-•	json\
-•	images\
-•	Phase 2 (AI Version)
-•	
-•	Frontend:
-•	
-•	Same HTML portal
-•	
-•	Backend:
-•	
-•	Node.js API Wrapper
-•	
-•	Authentication:
-•	
-•	Okta JWT Token
-•	
-•	AI:
-•	
-•	JLL AI APIs
-•	
-•	Purpose:
-•	
-•	Natural language chartfield assistance
-•	Combo edit explanation
-•	Finance terminology search
-•	Suggested chartfield combinations
-•	3. UI Layout
-•	
-•	Inspired by provided infographic.
-•	
-•	Portal should have:
-•	
-•	Plain Text
-•	-------------------------------------------------
-•	HEADER
-•	-------------------------------------------------
-•	JLL Finance Data Dictionary Portal
-•	Search Box
-•	AI Assistant Button
-•	Version
-•	-------------------------------------------------
-•	 
-•	TAB 1 | TAB 2 | TAB 3 | TAB 4 | TAB 5
-•	-------------------------------------------------
-•	 
-•	CONTENT AREA
-•	4. Tab Structure
-•	TAB 1
-•	ChartFields Overview
-•	
-•	Description:
-•	
-•	Interactive infographic view.
-•	
-•	Based on:
-•	
-•	Plain Text
-•	A-Chartfield Overview
-•	
-•	Visuals Required:
-•	
-•	Cards for:
-•	
-•	Business Unit
-•	Function
-•	Business Line
-•	Market
-•	Account
-•	Alternate Account
-•	Affiliate
-•	Project ID
-•	Book Code
-•	
-•	Each card should display:
-•	
-•	Example:
-•	
-•	Plain Text
-•	BUSINESS UNIT
-•	 
-•	Purpose:
-•	Represents legal entity
-•	 
-•	Structure:
-•	5 Character Code
-•	 
-•	Examples:
-•	US001
-•	IN001
-•	CN001
-•	 
-•	Rules:
-•	Country Based
-•	
-•	Hover Action:
-•	
-•	Show full definition.
-•	
-•	Click Action:
-•	
-•	Open details panel.
-•	
-•	TAB 2
-•	ChartField Combination Validator
-•	
-•	Most important functionality.
-•	
-•	Based on:
-•	
-•	Plain Text
-•	L - Combination Edits
-•	
-•	Purpose
-•	
-•	User enters all chartfield values.
-•	
-•	Portal validates combination.
-•	
-•	Fields Required
-•	
-•	FieldBusiness Unit
-•	Function
-•	Business Line
-•	Market
-•	Account
-•	Alternate Account
-•	Affiliate
-•	Project ID
-•	Book Code
-•	
-•	Validation Button
-•	
-•	Plain Text
-•	[ Validate Combination ]
-•	
-•	Output
-•	
-•	Valid Combination
-•	
-•	or
-•	
-•	Invalid Combination
-•	
-•	Detailed Output
-•	
-•	Example:
-•	
-•	Plain Text
-•	Rule Violated:
-•	 
-•	ACT_PROJ
-•	 
-•	Revenue Accounts Require Project
-•	 
-•	Account:
-•	40025
-•	 
-•	Project ID:
-•	Blank
-•	 
-•	Status:
-•	INVALID
-•	
-•	Validation Engine Rules
-•	
-•	Must support:
-•	
-•	ACT_PROJ
-•	ACT_AFF
-•	BL_PRJ
-•	MKT_FCT
-•	BK_ACT
-•	BL_ACT
-•	BL_ACT_BK
-•	BL_FCT_ACT
-•	FCT_BL_MKT
-•	ACT_FCT1
-•	ACT_FCT2
-•	BL_FCT
-•	ACT_BL
-•	
-•	All active combination edits from L Tab.
-•	
-•	Rule Storage
-•	
-•	JSON
-•	
-•	Example:
-•	
-•	JSON
-•	{
-•	"ruleId":"ACT_PROJ",
-•	"accountRange":"40000-49999",
-•	"projectRequired":true
-•	}
-•	
-•	AI Enhancement
-•	
-•	Add button:
-•	
-•	Plain Text
-•	Explain Why
-•	
-•	AI response:
-•	
-•	Plain Text
-•	This combination failed because:
-•	 
-•	Revenue accounts require a Project ID according to rule ACT_PROJ.
-•	TAB 3
-•	Finance Terminology
-•	
-•	Based on:
-•	
-•	Plain Text
-•	M Tab
-•	
-•	Layout
-•	
-•	Search box
-•	
-•	Plain Text
-•	Search Term
-•	
-•	Examples
-•	
-•	Account
-•	
-•	Function
-•	
-•	Asset Class
-•	
-•	Business Unit
-•	
-•	Market
-•	
-•	Project
-•	
-•	Output
-•	
-•	Definition
-•	
-•	Example
-•	
-•	Process Mapping
-•	
-•	System of Record
-•	
-•	Source System
-•	
-•	Consuming System
-•	
-•	Card Example
-•	
-•	Plain Text
-•	ACCOUNT
-•	 
-•	Definition:
-•	Classifies the nature of a transaction.
-•	 
-•	Example:
-•	40020 Transaction Fees
-•	 
-•	System:
-•	PeopleSoft
-•	
-•	AI Enhancement
-•	
-•	Natural Language Search
-•	
-•	Example:
-•	
-•	Plain Text
-•	What is Business Line?
-•	
-•	AI returns explanation.
-•	
-•	TAB 4
-•	ChartField Trees Explorer
-•	
-•	Based on:
-•	
-•	Plain Text
-•	K Tab
-•	
-•	Purpose
-•	
-•	Visual Hierarchy Browser
-•	
-•	Examples:
-•	
-•	Business Unit Tree
-•	
-•	Function Tree
-•	
-•	Market Tree
-•	
-•	Business Line Tree
-•	
-•	Account Tree
-•	
-•	Project Tree
-•	
-•	UI
-•	
-•	Collapsible Tree
-•	
-•	Example:
-•	
-•	Plain Text
-•	Business Unit
-•	|
-•	+ Americas
-•	+ US
-•	+ Canada
-•	 
-•	+ EMEA
-•	+ UK
-•	+ France
-•	
-•	Features
-•	
-•	Expand
-•	
-•	Collapse
-•	
-•	Search Node
-•	
-•	Node Details
-•	
-•	Tree Metadata
-•	
-•	TAB 5
-•	Miscellaneous
-•	
-•	Consolidated Finance Information.
-•	
-•	Contents:
-•	
-•	Asset Class
-•	
-•	(E Tab)
-•	
-•	Employee Definitions
-•	
-•	(I Tab)
-•	
-•	Employee Measures
-•	
-•	(J Tab)
-•	
-•	Project Types
-•	
-•	(O Tab)
-•	
-•	TimeSpans
-•	
-•	(N Tab)
-•	
-•	Each section should use:
-•	
-•	Accordion Layout
-•	
-•	Searchable
-•	
-•	Filterable
-•	
-•	5. AI Assistant Module
-•	
-•	Future Scope
-•	
-•	Floating Button:
-•	
-•	Plain Text
-•	Ask Finance AI
-•	
-•	Sample Prompts
-•	
-•	Plain Text
-•	What chartfields are required for Revenue Account?
-•	 
-•	Explain Book Code R.
-•	 
-•	What Market should be used for shared services?
-•	 
-•	Explain ACT_PROJ rule.
-•	
-•	Expected Output
-•	
-•	Context-aware responses using:
-•	
-•	Chartfield Overview
-•	Combination Edits
-•	Common Terminology
-•	Chartfield Trees
-•	6. File Structure
-•	Plain Text
-•	FinancePortal
-•	 
-•	index.html
-•	 
-•	css/
-•	style.css
-•	 
-•	js/
-•	app.js
-•	validator.js
-•	ai.js
-•	 
-•	json/
-•	chartfields.json
-•	combinationRules.json
-•	terminology.json
-•	trees.json
-•	employee.json
-•	projecttypes.json
-•	 
-•	images/
-•	chartfield_poster.png
-•	7. Shared Drive Deployment
-•	
-•	Location:
-•	
-•	Plain Text
-•	\\SharedDrive\\FinancePortal
-•	
-•	Maintain:
-•	
-•	Plain Text
-•	Finance Data Dictionary.xlsx
-•	
-•	and
-•	
-•	Plain Text
-•	index.html
-•	
-•	in same directory.
-•	
-•	Versioning:
-•	
-•	Plain Text
-•	v1.0
-•	v1.1
-•	v1.2
-•	
-•	Display version in footer.
-•	
-•	8. Non-Functional Requirements
-•	Performance
-•	Load under 3 seconds
-•	Fully client-side
-•	Browser Support
-•	Edge
-•	Chrome
-•	Firefox
-•	Mobile Support
-•	Responsive layout
-•	Security
-•	No API key stored in HTML
-•	Use backend proxy for AI calls
-•	Okta token handled server-side only
-•	Subscription keys never exposed in browser JavaScript
-•	9. Deliverables
-•	Phase 1
-•	
-•	✅ Responsive HTML Portal
-•	 ✅ ChartField Overview Tab
-•	 ✅ Combination Validator Engine
-•	 ✅ Finance Terminology Search
-•	 ✅ ChartField Trees Browser
-•	 ✅ Miscellaneous Tab
-•	
-•	Phase 2
-•	
-•	✅ JLL AI Integration
-•	 ✅ Natural Language Search
-•	 ✅ Explain Validation Failures
-•	 ✅ Finance Chat Assistant
-•	
-•	Success Criteria
-•	
-•	A Finance user should be able to:
-•	
-•	Understand all major ChartFields visually.
-•	Enter a chartfield combination and instantly know if it is valid.
-•	Search Finance terminology without opening Excel.
-•	Explore ChartField trees visually.
-•	Use AI to understand accounting rules and chartfield logic.
-•	Access everything from a single HTML page stored on the shared drive.
-•	Provide your feedback on BizChat
-•	
-•	
-•	Additional Requirements & Design Decisions
-•	10. Excel Workbook Usage Clarification
-•	Purpose of Excel Workbook
-•	
-•	The Finance Data Dictionary Excel workbook is only a reference source for:
-•	
-•	Sample ChartField values
-•	Sample code structures
-•	Sample Business Units
-•	Sample Functions
-•	Sample Markets
-•	Sample Accounts
-•	Sample Trees
-•	Sample Terminology
-•	
-•	The portal should NOT be tightly coupled to this workbook.
-•	
-•	Requirement
-•	Plain Text
-•	The uploaded Excel workbook shall be treated as a reference document only.
-•	 
-•	All runtime data used by the application shall be maintained
-•	within Shared Drive JSON/Configuration files.
-•	 
-•	The application should continue to function even if the
-•	reference workbook is unavailable.
-•	11. Shared Drive Only Storage Model
-•	Strict Requirement
-•	
-•	No components should be stored externally.
-•	
-•	All artifacts must reside within:
-•	
-•	Plain Text
-•	\\SharedDrive\\FinancePortal
-•	
-•	Including:
-•	
-•	Plain Text
-•	index.html
-•	 
-•	css/
-•	 
-•	js/
-•	 
-•	json/
-•	 
-•	images/
-•	 
-•	config/
-•	 
-•	Finance Data Dictionary.xlsx
-•	No External Databases
-•	
-•	Not required:
-•	
-•	SQL Server
-•	CosmosDB
-•	SharePoint Lists
-•	Dataverse
-•	Azure Storage
-•	Data Source
-•	Plain Text
-•	Shared Drive JSON Files
-•	
-•	Example:
-•	
-•	Plain Text
-•	combinationRules.json
-•	 
-•	chartfields.json
-•	 
-•	trees.json
-•	 
-•	terminology.json
-•	12. Validation Screen Behaviour
-•	User Input
-•	
-•	The following fields should be available:
-•	
-•	Plain Text
-•	Business Unit
-•	 
-•	Function
-•	 
-•	Business Line
-•	 
-•	Market
-•	 
-•	Account
-•	 
-•	Alternate Account
-•	 
-•	Affiliate
-•	 
-•	Project ID
-•	 
-•	Book Code
-•	Not Mandatory
-•	
-•	Users are NOT required to enter all fields.
-•	
-•	Example:
-•	
-•	Valid use case:
-•	
-•	Plain Text
-•	Account = 40025
-•	Project = blank
-•	 
-•	Validate
-•	
-•	System should still process.
-•	
-•	Validation Logic
-•	
-•	When Validate is clicked:
-•	
-•	Step 1
-•	
-•	Identify applicable rules.
-•	
-•	Example:
-•	
-•	Plain Text
-•	ACT_PROJ
-•	 
-•	requires:
-•	 
-•	Account
-•	Project
-•	
-•	If user has entered:
-•	
-•	Plain Text
-•	Business Unit only
-•	
-•	Then:
-•	
-•	Plain Text
-•	No applicable validation rule found.
-•	Step 2
-•	
-•	Skip irrelevant rules.
-•	
-•	Example:
-•	
-•	Rule:
-•	
-•	Plain Text
-•	FCT_BL_MKT
-•	
-•	requires:
-•	
-•	Plain Text
-•	Function
-•	Business Line
-•	Market
-•	
-•	User entered:
-•	
-•	Plain Text
-•	Market only
-•	
-•	Rule should NOT be evaluated.
-•	
-•	Step 3
-•	
-•	Evaluate only applicable rules.
-•	
-•	Example:
-•	
-•	Plain Text
-•	Account=40020
-•	 
-•	Project=blank
-•	
-•	Evaluate:
-•	
-•	Plain Text
-•	ACT_PROJ
-•	
-•	Result:
-•	
-•	Plain Text
-•	INVALID
-•	13. AI Usage Optimization
-•	Critical Requirement
-•	
-•	AI should NOT be called for every validation request.
-•	
-•	Validation Priority
-•	Level 1
-•	
-•	Local Rule Engine
-•	
-•	Always execute first.
-•	
-•	Example:
-•	
-•	Plain Text
-•	Validate Combination
-•	
-•	↓
-•	
-•	Plain Text
-•	Read combinationRules.json
-•	
-•	↓
-•	
-•	Plain Text
-•	Determine valid / invalid
-•	
-•	↓
-•	
-•	Plain Text
-•	Return result
-•	
-•	No AI call.
-•	
-•	AI Trigger Conditions
-•	
-•	AI should only be called for:
-•	
-•	Condition 1
-•	
-•	User clicks
-•	
-•	Plain Text
-•	Explain Result
-•	
-•	Example:
-•	
-•	Plain Text
-•	Why is this invalid?
-•	Condition 2
-•	
-•	User asks free-form questions.
-•	
-•	Examples:
-•	
-•	Plain Text
-•	What does Book Code R mean?
-•	 
-•	Explain ACT_PROJ.
-•	 
-•	What chartfields normally go with Account 40020?
-•	Condition 3
-•	
-•	No matching rule found locally.
-•	
-•	Example:
-•	
-•	Plain Text
-•	Very unusual combination.
-•	 
-•	No matching rule exists.
-•	
-•	System can ask AI for guidance.
-•	
-•	Do Not Call AI For
-•	
-•	❌ Standard validation
-•	
-•	❌ Tree lookup
-•	
-•	❌ ChartField definitions
-•	
-•	❌ Terminology lookup
-•	
-•	❌ Account hierarchy display
-•	
-•	❌ Market hierarchy display
-•	
-•	These should all come from local JSON configuration.
-•	
-•	14. AI Architecture Requirements
-•	Cost Optimization
-•	
-•	Portal should follow:
-•	
-•	Plain Text
-•	Local Rule Engine First
-•	 
-•	AI Second
-•	
-•	Priority:
-•	
-•	Plain Text
-•	JSON Rules
-•	↓
-•	Local Search
-•	↓
-•	AI
-•	
-•	This minimizes:
-•	
-•	API calls
-•	Cost
-•	Latency
-•	15. Expected User Journey
-•	Scenario 1
-•	
-•	User enters:
-•	
-•	Plain Text
-•	Account = 40020
-•	Project = blank
-•	
-•	Clicks:
-•	
-•	Plain Text
-•	Validate
-•	
-•	Output:
-•	
-•	Plain Text
-•	INVALID
-•	 
-•	ACT_PROJ
-•	 
-•	Revenue accounts require Project ID.
-•	
-•	AI Call:
-•	
-•	Plain Text
-•	NO
-•	Scenario 2
-•	
-•	User clicks:
-•	
-•	Plain Text
-•	Explain Why
-•	
-•	Output:
-•	
-•	Plain Text
-•	AI explanation.
-•	 
-•	Revenue accounts are associated with projects
-•	to support client activity tracking.
-•	
-•	AI Call:
-•	
-•	Plain Text
-•	YES
-•	Scenario 3
-•	
-•	User searches:
-•	
-•	Plain Text
-•	Asset Class
-•	
-•	Output:
-•	
-•	Plain Text
-•	Definition from local terminology JSON.
-•	
-•	AI Call:
-•	
-•	Plain Text
-•	NO
-•	Scenario 4
-•	
-•	User asks:
-•	
-•	Plain Text
-•	Suggest a valid combination for a Leasing transaction.
-•	
-•	Output:
-•	
-•	AI generated recommendation.
-•	
-•	AI Call:
-•	
-•	Plain Text
-•	YES
-•	16. Future Enhancement
-•	
-•	Add Administration Page
-•	
-•	Only admins can:
-•	
-•	Upload new Excel reference files
-•	Regenerate JSON files
-•	Update combination rules
-•	Update terminology
-•	Update chartfield trees
-•	
-•	Normal users receive read-only access.
-•	
-•	Final Architecture Principle
-•	
-•	The Excel workbook serves only as a reference template and sample value repository. The portal itself must be fully self-sufficient using Shared Drive-based JSON/configuration files. Validation must be handled locally first, and AI should be invoked only when explanation, recommendation, or advanced guidance is specifically requested.
-•	
-Provide your feedback on BizChat
+Test Request
+(get /model_group/info)
+Status:200
+Status:422
+null
+Successful Response
+
+Public Model Hub​Copy link
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/public/model_hub
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/public/model_hub \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(get /public/model_hub)
+Status:200
+[
+  {
+    "model_group": "string",
+    "providers": [
+      "string"
+    ],
+    "max_input_tokens": 1,
+    "max_output_tokens": 1,
+    "input_cost_per_token": 1,
+    "output_cost_per_token": 1,
+    "input_cost_per_pixel": 1,
+    "mode": "chat",
+    "tpm": 1,
+    "rpm": 1,
+    "supports_parallel_function_calling": false,
+    "supports_vision": false,
+    "supports_web_search": false,
+    "supports_url_context": false,
+    "supports_reasoning": false,
+    "supports_function_calling": false,
+    "supported_openai_params": [],
+    "configurable_clientside_auth_params": [
+      "string"
+    ],
+    "is_public_model_group": false,
+    "health_status": "string",
+    "health_response_time": 1,
+    "health_checked_at": "string"
+  }
+]
+
+Successful Response
+
+Public Model Hub Info​Copy link
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/public/model_hub/info
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/public/model_hub/info
+
+
+Test Request
+(get /public/model_hub/info)
+Status:200
+{
+  "docs_title": "string",
+  "custom_docs_description": "string",
+  "litellm_version": "string",
+  "useful_links": {
+    "additionalProperty": "string"
+  }
+}
+
+Successful Response
+
+Get Litellm Model Cost Map​Copy link
+Public endpoint to get the LiteLLM model cost map. Returns pricing information for all supported models.
+
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/public/litellm_model_cost_map
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/public/litellm_model_cost_map
+
+
+Test Request
+(get /public/litellm_model_cost_map)
+Status:200
+null
+Successful Response
+
+Patch Model​Copy link
+PATCH Endpoint for partial model updates.
+
+Only updates the fields specified in the request while preserving other existing values. Follows proper PATCH semantics by only modifying provided fields.
+
+Args: model_id: The ID of the model to update patch_data: The fields to update and their new values user_api_key_dict: User authentication information
+
+Returns: Updated model information
+
+Raises: ProxyException: For various error conditions including authentication and database errors
+
+Path Parameters
+model_idCopy link to model_id
+Type:string · Model Id
+required
+Body
+required
+application/json
+litellm_paramsCopy link to litellm_params
+Type:object · updateLiteLLMParams
+nullable
+Show updateLiteLLMParamsfor litellm_params
+model_infoCopy link to model_info
+Type:object · ModelInfo
+nullable
+Show ModelInfofor model_info
+model_nameCopy link to model_name
+Type:string · Model Name
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpatch/model/{model_id}/update
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/model/{model_id}/update' \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "model_name": "",
+  "litellm_params": {
+    "input_cost_per_token": 1,
+    "output_cost_per_token": 1,
+    "input_cost_per_second": 1,
+    "output_cost_per_second": 1,
+    "input_cost_per_pixel": 1,
+    "output_cost_per_pixel": 1,
+    "input_cost_per_token_flex": 1,
+    "input_cost_per_token_priority": 1,
+    "cache_creation_input_token_cost": 1,
+    "cache_creation_input_token_cost_above_1hr": 1,
+    "cache_creation_input_token_cost_above_200k_tokens": 1,
+    "cache_creation_input_audio_token_cost": 1,
+    "cache_read_input_token_cost": 1,
+    "cache_read_input_token_cost_flex": 1,
+    "cache_read_input_token_cost_priority": 1,
+    "cache_read_input_token_cost_above_200k_tokens": 1,
+    "cache_read_input_audio_token_cost": 1,
+    "input_cost_per_character": 1,
+    "input_cost_per_character_above_128k_tokens": 1,
+    "input_cost_per_audio_token": 1,
+    "input_cost_per_token_cache_hit": 1,
+    "input_cost_per_token_above_128k_tokens": 1,
+    "input_cost_per_token_above_200k_tokens": 1,
+    "input_cost_per_query": 1,
+    "input_cost_per_image": 1,
+    "input_cost_per_image_above_128k_tokens": 1,
+    "input_cost_per_audio_per_second": 1,
+    "input_cost_per_audio_per_second_above_128k_tokens": 1,
+    "input_cost_per_video_per_second": 1,
+    "input_cost_per_video_per_second_above_128k_tokens": 1,
+    "input_cost_per_video_per_second_above_15s_interval": 1,
+    "input_cost_per_video_per_second_above_8s_interval": 1,
+    "input_cost_per_token_batches": 1,
+    "output_cost_per_token_batches": 1,
+    "output_cost_per_token_flex": 1,
+    "output_cost_per_token_priority": 1,
+    "output_cost_per_character": 1,
+    "output_cost_per_audio_token": 1,
+    "output_cost_per_token_above_128k_tokens": 1,
+    "output_cost_per_token_above_200k_tokens": 1,
+    "output_cost_per_character_above_128k_tokens": 1,
+    "output_cost_per_image": 1,
+    "output_cost_per_image_token": 1,
+    "output_cost_per_reasoning_token": 1,
+    "output_cost_per_video_per_second": 1,
+    "output_cost_per_audio_per_second": 1,
+    "search_context_cost_per_query": {
+      "additionalProperty": "anything"
+    },
+    "citation_cost_per_token": 1,
+    "tiered_pricing": [
+      {
+        "additionalProperty": "anything"
+      }
+    ],
+    "api_key": "",
+    "api_base": "",
+    "api_version": "",
+    "vertex_project": "",
+    "vertex_location": "",
+    "vertex_credentials": "",
+    "region_name": "",
+    "aws_access_key_id": "",
+    "aws_secret_access_key": "",
+    "aws_region_name": "",
+    "aws_bedrock_runtime_endpoint": "",
+    "watsonx_region_name": "",
+    "custom_llm_provider": "",
+    "tpm": 1,
+    "rpm": 1,
+    "timeout": 1,
+    "stream_timeout": 1,
+    "max_retries": 1,
+    "organization": "",
+    "configurable_clientside_auth_params": [
+      ""
+    ],
+    "litellm_credential_name": "",
+    "litellm_trace_id": "",
+    "max_file_size_mb": 1,
+    "max_budget": 1,
+    "budget_duration": "",
+    "use_in_pass_through": false,
+    "use_litellm_proxy": false,
+    "merge_reasoning_content_in_choices": false,
+    "model_info": {
+      "additionalProperty": "anything"
+    },
+    "mock_response": "",
+    "tags": [
+      ""
+    ],
+    "tag_regex": [
+      ""
+    ],
+    "auto_router_config_path": "",
+    "auto_router_config": "",
+    "auto_router_default_model": "",
+    "auto_router_embedding_model": "",
+    "complexity_router_config": {
+      "additionalProperty": "anything"
+    },
+    "complexity_router_default_model": "",
+    "s3_bucket_name": "",
+    "s3_encryption_key_id": "",
+    "gcs_bucket_name": "",
+    "vector_store_id": "",
+    "milvus_text_field": "",
+    "model": "",
+    "additionalProperty": "anything"
+  },
+  "model_info": {
+    "id": "",
+    "db_model": false,
+    "updated_at": "",
+    "updated_by": "",
+    "created_at": "",
+    "created_by": "",
+    "base_model": "",
+    "tier": "free",
+    "team_id": "",
+    "team_public_model_name": "",
+    "additionalProperty": "anything"
+  }
+}'
+
+
+Test Request
+(patch /model/{model_id}/update)
+Status:200
+Status:422
+null
+Successful Response
+
+chat/completions ​Copy link
+chat/completionsOperations
+post
+/openai/deployments/{model}/chat/completions
+post
+/engines/{model}/chat/completions
+post
+/chat/completions
+post
+/v1/chat/completions
+Chat Completion​Copy link
+Follows the exact same API spec as OpenAI's Chat API https://platform.openai.com/docs/api-reference/chat
+
+curl -X POST http://localhost:4000/v1/chat/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-4o",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hello!"
+        }
+    ]
+}'
+Path Parameters
+modelCopy link to model
+Type:string · Model
+nullable
+required
+Body
+required
+application/json
+messagesCopy link to messages
+Type:array · Messages
+required
+Example
+Show Child Attributesfor messages
+modelCopy link to model
+Type:string · Model
+required
+cachingCopy link to caching
+Type:boolean · Caching
+nullable
+Default
+context_window_fallback_dictCopy link to context_window_fallback_dict
+Type:object · Context Window Fallback Dict
+nullable
+Default
+Show Context Window Fallback Dictfor context_window_fallback_dict
+fallbacksCopy link to fallbacks
+Type:array string[] | null · Fallbacks
+nullable
+Default
+frequency_penaltyCopy link to frequency_penalty
+Type:number · Frequency Penalty
+nullable
+Default
+function_callCopy link to function_call
+nullable
+
+Any of
+Function Call
+Type:string · Function Call
+Default
+functionsCopy link to functions
+Type:array object[] | null · Functions
+nullable
+Default
+Show Child Attributesfor functions
+guardrailsCopy link to guardrails
+Type:array string[] | null · Guardrails
+nullable
+Default
+logit_biasCopy link to logit_bias
+Type:object · Logit Bias
+nullable
+Default
+Show Logit Biasfor logit_bias
+logprobsCopy link to logprobs
+Type:boolean · Logprobs
+nullable
+Default
+max_tokensCopy link to max_tokens
+Type:integer · Max Tokens
+nullable
+Default
+Integer numbers.
+
+Show additional propertiesfor Request Body
+Responses
+
+200
+Successful response
+application/json
+
+400
+ContentPolicyViolationError
+application/json
+
+401
+AuthenticationError
+application/json
+
+403
+PermissionDeniedError
+application/json
+
+404
+NotFoundError
+application/json
+
+408
+Timeout
+application/json
+
+422
+UnprocessableEntityError
+application/json
+
+429
+RateLimitError
+application/json
+
+500
+JSONSchemaValidationError
+application/json
+
+503
+APIConnectionError
+application/json
+Request Example forpost/openai/deployments/{model}/chat/completions
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/openai/deployments/{model}/chat/completions' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "model": "",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "frequency_penalty": null,
+  "logit_bias": null,
+  "logprobs": null,
+  "top_logprobs": null,
+  "max_tokens": null,
+  "n": null,
+  "presence_penalty": null,
+  "response_format": null,
+  "seed": null,
+  "service_tier": null,
+  "stop": null,
+  "stream_options": null,
+  "temperature": null,
+  "top_p": null,
+  "tools": null,
+  "tool_choice": null,
+  "parallel_tool_calls": null,
+  "function_call": null,
+  "functions": null,
+  "user": null,
+  "stream": null,
+  "metadata": null,
+  "guardrails": null,
+  "caching": null,
+  "num_retries": null,
+  "context_window_fallback_dict": null,
+  "fallbacks": null
+}'
+
+
+Test Request
+(post /openai/deployments/{model}/chat/completions)
+Status:200
+Status:400
+Status:401
+Status:403
+Status:404
+Status:408
+Status:422
+Status:429
+Status:500
+Status:503
+null
+Successful response
+
+Chat Completion​Copy link
+Follows the exact same API spec as OpenAI's Chat API https://platform.openai.com/docs/api-reference/chat
+
+curl -X POST http://localhost:4000/v1/chat/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-4o",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hello!"
+        }
+    ]
+}'
+Path Parameters
+modelCopy link to model
+Type:string · Model
+nullable
+required
+Body
+required
+application/json
+messagesCopy link to messages
+Type:array · Messages
+required
+Example
+Show Child Attributesfor messages
+modelCopy link to model
+Type:string · Model
+required
+cachingCopy link to caching
+Type:boolean · Caching
+nullable
+Default
+context_window_fallback_dictCopy link to context_window_fallback_dict
+Type:object · Context Window Fallback Dict
+nullable
+Default
+Show Context Window Fallback Dictfor context_window_fallback_dict
+fallbacksCopy link to fallbacks
+Type:array string[] | null · Fallbacks
+nullable
+Default
+frequency_penaltyCopy link to frequency_penalty
+Type:number · Frequency Penalty
+nullable
+Default
+function_callCopy link to function_call
+nullable
+
+Any of
+Function Call
+Type:string · Function Call
+Default
+functionsCopy link to functions
+Type:array object[] | null · Functions
+nullable
+Default
+Show Child Attributesfor functions
+guardrailsCopy link to guardrails
+Type:array string[] | null · Guardrails
+nullable
+Default
+logit_biasCopy link to logit_bias
+Type:object · Logit Bias
+nullable
+Default
+Show Logit Biasfor logit_bias
+logprobsCopy link to logprobs
+Type:boolean · Logprobs
+nullable
+Default
+max_tokensCopy link to max_tokens
+Type:integer · Max Tokens
+nullable
+Default
+Integer numbers.
+
+Show additional propertiesfor Request Body
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/engines/{model}/chat/completions
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/engines/{model}/chat/completions' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "model": "",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "frequency_penalty": null,
+  "logit_bias": null,
+  "logprobs": null,
+  "top_logprobs": null,
+  "max_tokens": null,
+  "n": null,
+  "presence_penalty": null,
+  "response_format": null,
+  "seed": null,
+  "service_tier": null,
+  "stop": null,
+  "stream_options": null,
+  "temperature": null,
+  "top_p": null,
+  "tools": null,
+  "tool_choice": null,
+  "parallel_tool_calls": null,
+  "function_call": null,
+  "functions": null,
+  "user": null,
+  "stream": null,
+  "metadata": null,
+  "guardrails": null,
+  "caching": null,
+  "num_retries": null,
+  "context_window_fallback_dict": null,
+  "fallbacks": null
+}'
+
+
+Test Request
+(post /engines/{model}/chat/completions)
+Status:200
+Status:422
+null
+Successful Response
+
+Chat Completion​Copy link
+Follows the exact same API spec as OpenAI's Chat API https://platform.openai.com/docs/api-reference/chat
+
+curl -X POST http://localhost:4000/v1/chat/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-4o",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hello!"
+        }
+    ]
+}'
+Body
+required
+application/json
+messagesCopy link to messages
+Type:array · Messages
+required
+Example
+Show Child Attributesfor messages
+modelCopy link to model
+Type:string · Model
+required
+cachingCopy link to caching
+Type:boolean · Caching
+nullable
+Default
+context_window_fallback_dictCopy link to context_window_fallback_dict
+Type:object · Context Window Fallback Dict
+nullable
+Default
+Show Context Window Fallback Dictfor context_window_fallback_dict
+fallbacksCopy link to fallbacks
+Type:array string[] | null · Fallbacks
+nullable
+Default
+frequency_penaltyCopy link to frequency_penalty
+Type:number · Frequency Penalty
+nullable
+Default
+function_callCopy link to function_call
+nullable
+
+Any of
+Function Call
+Type:string · Function Call
+Default
+functionsCopy link to functions
+Type:array object[] | null · Functions
+nullable
+Default
+Show Child Attributesfor functions
+guardrailsCopy link to guardrails
+Type:array string[] | null · Guardrails
+nullable
+Default
+logit_biasCopy link to logit_bias
+Type:object · Logit Bias
+nullable
+Default
+Show Logit Biasfor logit_bias
+logprobsCopy link to logprobs
+Type:boolean · Logprobs
+nullable
+Default
+max_tokensCopy link to max_tokens
+Type:integer · Max Tokens
+nullable
+Default
+Integer numbers.
+
+Show additional propertiesfor Request Body
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/chat/completions
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/chat/completions \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "model": "",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "frequency_penalty": null,
+  "logit_bias": null,
+  "logprobs": null,
+  "top_logprobs": null,
+  "max_tokens": null,
+  "n": null,
+  "presence_penalty": null,
+  "response_format": null,
+  "seed": null,
+  "service_tier": null,
+  "stop": null,
+  "stream_options": null,
+  "temperature": null,
+  "top_p": null,
+  "tools": null,
+  "tool_choice": null,
+  "parallel_tool_calls": null,
+  "function_call": null,
+  "functions": null,
+  "user": null,
+  "stream": null,
+  "metadata": null,
+  "guardrails": null,
+  "caching": null,
+  "num_retries": null,
+  "context_window_fallback_dict": null,
+  "fallbacks": null
+}'
+
+
+Test Request
+(post /chat/completions)
+Status:200
+Status:422
+null
+Successful Response
+
+Chat Completion​Copy link
+Follows the exact same API spec as OpenAI's Chat API https://platform.openai.com/docs/api-reference/chat
+
+curl -X POST http://localhost:4000/v1/chat/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-4o",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hello!"
+        }
+    ]
+}'
+Body
+required
+application/json
+messagesCopy link to messages
+Type:array · Messages
+required
+Example
+Show Child Attributesfor messages
+modelCopy link to model
+Type:string · Model
+required
+cachingCopy link to caching
+Type:boolean · Caching
+nullable
+Default
+context_window_fallback_dictCopy link to context_window_fallback_dict
+Type:object · Context Window Fallback Dict
+nullable
+Default
+Show Context Window Fallback Dictfor context_window_fallback_dict
+fallbacksCopy link to fallbacks
+Type:array string[] | null · Fallbacks
+nullable
+Default
+frequency_penaltyCopy link to frequency_penalty
+Type:number · Frequency Penalty
+nullable
+Default
+function_callCopy link to function_call
+nullable
+
+Any of
+Function Call
+Type:string · Function Call
+Default
+functionsCopy link to functions
+Type:array object[] | null · Functions
+nullable
+Default
+Show Child Attributesfor functions
+guardrailsCopy link to guardrails
+Type:array string[] | null · Guardrails
+nullable
+Default
+logit_biasCopy link to logit_bias
+Type:object · Logit Bias
+nullable
+Default
+Show Logit Biasfor logit_bias
+logprobsCopy link to logprobs
+Type:boolean · Logprobs
+nullable
+Default
+max_tokensCopy link to max_tokens
+Type:integer · Max Tokens
+nullable
+Default
+Integer numbers.
+
+Show additional propertiesfor Request Body
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/v1/chat/completions
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/chat/completions \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "model": "",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "frequency_penalty": null,
+  "logit_bias": null,
+  "logprobs": null,
+  "top_logprobs": null,
+  "max_tokens": null,
+  "n": null,
+  "presence_penalty": null,
+  "response_format": null,
+  "seed": null,
+  "service_tier": null,
+  "stop": null,
+  "stream_options": null,
+  "temperature": null,
+  "top_p": null,
+  "tools": null,
+  "tool_choice": null,
+  "parallel_tool_calls": null,
+  "function_call": null,
+  "functions": null,
+  "user": null,
+  "stream": null,
+  "metadata": null,
+  "guardrails": null,
+  "caching": null,
+  "num_retries": null,
+  "context_window_fallback_dict": null,
+  "fallbacks": null
+}'
+
+
+Test Request
+(post /v1/chat/completions)
+Status:200
+Status:422
+null
+Successful Response
+
+completions ​Copy link
+completionsOperations
+post
+/openai/deployments/{model}/completions
+post
+/engines/{model}/completions
+post
+/completions
+post
+/v1/completions
+Completion​Copy link
+Follows the exact same API spec as OpenAI's Completions API https://platform.openai.com/docs/api-reference/completions
+
+curl -X POST http://localhost:4000/v1/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Once upon a time",
+    "max_tokens": 50,
+    "temperature": 0.7
+}'
+Path Parameters
+modelCopy link to model
+Type:string · Model
+nullable
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/openai/deployments/{model}/completions
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/openai/deployments/{model}/completions' \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /openai/deployments/{model}/completions)
+Status:200
+Status:422
+null
+Successful Response
+
+Completion​Copy link
+Follows the exact same API spec as OpenAI's Completions API https://platform.openai.com/docs/api-reference/completions
+
+curl -X POST http://localhost:4000/v1/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Once upon a time",
+    "max_tokens": 50,
+    "temperature": 0.7
+}'
+Path Parameters
+modelCopy link to model
+Type:string · Model
+nullable
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/engines/{model}/completions
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/engines/{model}/completions' \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /engines/{model}/completions)
+Status:200
+Status:422
+null
+Successful Response
+
+Completion​Copy link
+Follows the exact same API spec as OpenAI's Completions API https://platform.openai.com/docs/api-reference/completions
+
+curl -X POST http://localhost:4000/v1/completions 
+-H "Content-Type: application/json" 
+-H "Authorization: Bearer sk-1234" 
+-d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Once upon a time",
+    "max_tokens": 50,
+    "temperature": 0.7
+}'
+Query Parameters
+modelCopy link to model
+Type:string · Model
+nullable
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/completions
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/completions \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /completions)
+Status:200
+Status:422
+null
+Successful Response
+
+embeddings (Collapsed)​Copy link
+embeddingsOperations
+post
+/openai/deployments/{model}/embeddings
+post
+/engines/{model}/embeddings
+post
+/embeddings
+post
+/v1/embeddings
+Show More
+moderations (Collapsed)​Copy link
+moderationsOperations
+post
+/moderations
+post
+/v1/moderations
+Show More
+audio (Collapsed)​Copy link
+audioOperations
+post
+/audio/speech
+post
+/v1/audio/speech
+post
+/audio/transcriptions
+post
+/v1/audio/transcriptions
+Show More
+assistants (Collapsed)​Copy link
+assistantsOperations
+post
+/threads
+post
+/v1/threads
+get
+/threads/{thread_id}
+get
+/v1/threads/{thread_id}
+post
+/threads/{thread_id}/messages
+get
+/threads/{thread_id}/messages
+post
+/v1/threads/{thread_id}/messages
+get
+/v1/threads/{thread_id}/messages
+post
+/threads/{thread_id}/runs
+post
+/v1/threads/{thread_id}/runs
+Show More
+llm utils (Collapsed)​Copy link
+llm utilsOperations
+post
+/utils/token_counter
+get
+/utils/supported_openai_params
+post
+/utils/transform_request
+Show More
+responses ​Copy link
+responsesOperations
+post
+/openai/v1/responses
+post
+/cursor/chat/completions
+get
+/openai/v1/responses/{response_id}
+delete
+/openai/v1/responses/{response_id}
+get
+/responses/{response_id}
+delete
+/responses/{response_id}
+get
+/v1/responses/{response_id}
+delete
+/v1/responses/{response_id}
+get
+/openai/v1/responses/{response_id}/input_items
+get
+/responses/{response_id}/input_items
+get
+/v1/responses/{response_id}/input_items
+post
+/openai/v1/responses/compact
+post
+/responses/compact
+post
+/v1/responses/compact
+post
+/openai/v1/responses/{response_id}/cancel
+post
+/responses/{response_id}/cancel
+post
+/v1/responses/{response_id}/cancel
+Responses Api​Copy link
+Follows the OpenAI Responses API spec: https://platform.openai.com/docs/api-reference/responses
+
+Supports background mode with polling_via_cache for partial response retrieval. When background=true and polling_via_cache is enabled, returns a polling_id immediately and streams the response in the background, updating Redis cache.
+
+# Normal request
+curl -X POST http://localhost:4000/v1/responses     -H "Content-Type: application/json"     -H "Authorization: Bearer sk-1234"     -d '{
+    "model": "gpt-4o",
+    "input": "Tell me about AI"
+}'
+
+# Background request with polling
+curl -X POST http://localhost:4000/v1/responses     -H "Content-Type: application/json"     -H "Authorization: Bearer sk-1234"     -d '{
+    "model": "gpt-4o",
+    "input": "Tell me about AI",
+    "background": true
+}'
+Responses
+
+200
+Successful Response
+application/json
+Request Example forpost/openai/v1/responses
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/openai/v1/responses \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /openai/v1/responses)
+Status:200
+null
+Successful Response
+
+Cursor Chat Completions​Copy link
+Cursor-specific endpoint that accepts Responses API input format but returns chat completions format.
+
+This endpoint handles requests from Cursor IDE which sends Responses API format (input field) but expects chat completions format response (choices, messages, etc.).
+
+curl -X POST http://localhost:4000/cursor/chat/completions     -H "Content-Type: application/json"     -H "Authorization: Bearer sk-1234"     -d '{
+    "model": "gpt-4o",
+    "input": [{"role": "user", "content": "Hello"}]
+}'
+Responds back in chat completions format.
+Responses
+
+200
+Successful Response
+application/json
+Request Example forpost/cursor/chat/completions
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/cursor/chat/completions \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /cursor/chat/completions)
+Status:200
+null
+Successful Response
+
+Delete Response​Copy link
+Delete a response by ID.
+
+Supports both:
+
+Polling IDs (litellm_poll_*): Deletes from Redis cache
+Provider response IDs: Passes through to provider API
+Follows the OpenAI Responses API spec: https://platform.openai.com/docs/api-reference/responses/delete
+
+curl -X DELETE http://localhost:4000/v1/responses/resp_abc123     -H "Authorization: Bearer sk-1234"
+Path Parameters
+response_idCopy link to response_id
+Type:string · Response Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example fordelete/responses/{response_id}
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/responses/{response_id}' \
+  --request DELETE \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(delete /responses/{response_id})
+Status:200
+Status:422
+null
+Successful Response
+
+Get Response​Copy link
+Get a response by ID.
+
+Supports both:
+
+Polling IDs (litellm_poll_*): Returns cumulative cached content from background responses
+Provider response IDs: Passes through to provider API
+Follows the OpenAI Responses API spec: https://platform.openai.com/docs/api-reference/responses/get
+
+# Get polling response
+curl -X GET http://localhost:4000/v1/responses/litellm_poll_abc123     -H "Authorization: Bearer sk-1234"
+
+# Get provider response
+curl -X GET http://localhost:4000/v1/responses/resp_abc123     -H "Authorization: Bearer sk-1234"
+Path Parameters
+response_idCopy link to response_id
+Type:string · Response Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forget/v1/responses/{response_id}
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/responses/{response_id}' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(get /v1/responses/{response_id})
+Status:200
+Status:422
+null
+Successful Response
+
+Cancel Response​Copy link
+Cancel a response by ID.
+
+Supports both:
+
+Polling IDs (litellm_poll_*): Cancels background response and updates status in Redis
+Provider response IDs: Passes through to provider API
+Follows the OpenAI Responses API spec: https://platform.openai.com/docs/api-reference/responses/cancel
+
+# Cancel polling response
+curl -X POST http://localhost:4000/v1/responses/litellm_poll_abc123/cancel     -H "Authorization: Bearer sk-1234"
+
+# Cancel provider response
+curl -X POST http://localhost:4000/v1/responses/resp_abc123/cancel     -H "Authorization: Bearer sk-1234"
+Path Parameters
+response_idCopy link to response_id
+Type:string · Response Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/openai/v1/responses/{response_id}/cancel
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/openai/v1/responses/{response_id}/cancel' \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /openai/v1/responses/{response_id}/cancel)
+Status:200
+Status:422
+null
+Successful Response
+
+Cancel Response​Copy link
+Cancel a response by ID.
+
+Supports both:
+
+Polling IDs (litellm_poll_*): Cancels background response and updates status in Redis
+Provider response IDs: Passes through to provider API
+Follows the OpenAI Responses API spec: https://platform.openai.com/docs/api-reference/responses/cancel
+
+# Cancel polling response
+curl -X POST http://localhost:4000/v1/responses/litellm_poll_abc123/cancel     -H "Authorization: Bearer sk-1234"
+
+# Cancel provider response
+curl -X POST http://localhost:4000/v1/responses/resp_abc123/cancel     -H "Authorization: Bearer sk-1234"
+Path Parameters
+response_idCopy link to response_id
+Type:string · Response Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/responses/{response_id}/cancel
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/responses/{response_id}/cancel' \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /responses/{response_id}/cancel)
+Status:200
+Status:422
+null
+Successful Response
+
+Cancel Response​Copy link
+Cancel a response by ID.
+
+Supports both:
+
+Polling IDs (litellm_poll_*): Cancels background response and updates status in Redis
+Provider response IDs: Passes through to provider API
+Follows the OpenAI Responses API spec: https://platform.openai.com/docs/api-reference/responses/cancel
+
+# Cancel polling response
+curl -X POST http://localhost:4000/v1/responses/litellm_poll_abc123/cancel     -H "Authorization: Bearer sk-1234"
+
+# Cancel provider response
+curl -X POST http://localhost:4000/v1/responses/resp_abc123/cancel     -H "Authorization: Bearer sk-1234"
+Path Parameters
+response_idCopy link to response_id
+Type:string · Response Id
+required
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/v1/responses/{response_id}/cancel
+Shell Curl
+curl 'https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/responses/{response_id}/cancel' \
+  --request POST \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(post /v1/responses/{response_id}/cancel)
+Status:200
+Status:422
+null
+Successful Response
+
+WebSocket (Collapsed)​Copy link
+WebSocketOperations
+get
+/responses
+get
+/v1/responses
+Show More
+batch (Collapsed)​Copy link
+batchOperations
+post
+/batches
+get
+/batches
+post
+/v1/batches
+get
+/v1/batches
+post
+/{provider}/v1/batches
+get
+/{provider}/v1/batches
+get
+/batches/{batch_id}
+get
+/v1/batches/{batch_id}
+get
+/{provider}/v1/batches/{batch_id}
+post
+/batches/{batch_id}/cancel
+post
+/v1/batches/{batch_id}/cancel
+post
+/{provider}/v1/batches/{batch_id}/cancel
+Show More
+videos (Collapsed)​Copy link
+videosOperations
+get
+/videos
+post
+/videos
+get
+/v1/videos
+post
+/v1/videos
+get
+/videos/{video_id}
+get
+/v1/videos/{video_id}
+get
+/videos/{video_id}/content
+get
+/v1/videos/{video_id}/content
+post
+/videos/{video_id}/remix
+post
+/v1/videos/{video_id}/remix
+Show More
+containers (Collapsed)​Copy link
+containersOperations
+get
+/containers
+post
+/containers
+get
+/v1/containers
+post
+/v1/containers
+get
+/containers/{container_id}
+delete
+/containers/{container_id}
+get
+/v1/containers/{container_id}
+delete
+/v1/containers/{container_id}
+get
+/v1/containers/{container_id}/files
+post
+/v1/containers/{container_id}/files
+get
+/containers/{container_id}/files
+post
+/containers/{container_id}/files
+get
+/v1/containers/{container_id}/files/{file_id}
+delete
+/v1/containers/{container_id}/files/{file_id}
+get
+/containers/{container_id}/files/{file_id}
+delete
+/containers/{container_id}/files/{file_id}
+get
+/v1/containers/{container_id}/files/{file_id}/content
+get
+/containers/{container_id}/files/{file_id}/content
+Show More
+search (Collapsed)​Copy link
+searchOperations
+post
+/search
+post
+/v1/search
+post
+/search/{search_tool_name}
+post
+/v1/search/{search_tool_name}
+get
+/search/tools
+get
+/v1/search/tools
+Show More
+images (Collapsed)​Copy link
+imagesOperations
+post
+/openai/deployments/{model}/images/generations
+post
+/images/generations
+post
+/v1/images/generations
+post
+/openai/deployments/{model}/images/edits
+post
+/images/edits
+post
+/v1/images/edits
+Show More
+fine-tuning (Collapsed)​Copy link
+fine-tuningOperations
+post
+/fine_tuning/jobs
+get
+/fine_tuning/jobs
+post
+/v1/fine_tuning/jobs
+get
+/v1/fine_tuning/jobs
+get
+/fine_tuning/jobs/{fine_tuning_job_id}
+get
+/v1/fine_tuning/jobs/{fine_tuning_job_id}
+post
+/fine_tuning/jobs/{fine_tuning_job_id}/cancel
+post
+/v1/fine_tuning/jobs/{fine_tuning_job_id}/cancel
+Show More
+credential management (Collapsed)​Copy link
+credential managementOperations
+get
+/credentials
+post
+/credentials
+Show More
+OpenAI Evals API (Collapsed)​Copy link
+OpenAI Evals APIOperations
+post
+/v1/evals
+get
+/v1/evals
+Show More
+health (Collapsed)​Copy link
+healthOperations
+get
+/health/services
+get
+/health
+get
+/health/readiness
+options
+/health/readiness
+get
+/health/liveness
+options
+/health/liveness
+get
+/health/liveliness
+options
+/health/liveliness
+Show More
+Internal User management (Collapsed)​Copy link
+Internal User managementOperations
+get
+/user/info
+Show More
+Budget & Spend Tracking (Collapsed)​Copy link
+Budget & Spend TrackingOperations
+post
+/spend/calculate
+post
+/usage/ai/chat
+Show More
+Guardrails ​Copy link
+GuardrailsOperations
+get
+/v2/guardrails/list
+post
+/guardrails
+List Guardrails V2​Copy link
+List the guardrails that are available in the database using GuardrailRegistry
+
+👉 Guardrail docs
+
+Example Request:
+
+curl -X GET "http://localhost:4000/v2/guardrails/list" -H "Authorization: Bearer <your_api_key>"
+Example Response:
+
+{
+    "guardrails": [
+        {
+            "guardrail_id": "123e4567-e89b-12d3-a456-426614174000",
+            "guardrail_name": "my-bedrock-guard",
+            "litellm_params": {
+                "guardrail": "bedrock",
+                "mode": "pre_call",
+                "guardrailIdentifier": "ff6ujrregl1q",
+                "guardrailVersion": "DRAFT",
+                "default_on": true
+            },
+            "guardrail_info": {
+                "description": "Bedrock content moderation guardrail"
+            }
+        }
+    ]
+}
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/v2/guardrails/list
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v2/guardrails/list \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(get /v2/guardrails/list)
+Status:200
+{
+  "guardrails": [
+    {
+      "guardrail_id": "string",
+      "guardrail_name": "string",
+      "litellm_params": null,
+      "guardrail_info": {
+        "additionalProperty": "anything"
+      },
+      "created_at": "2026-10-13T13:03:25.547Z",
+      "updated_at": "2026-10-13T13:03:25.547Z",
+      "guardrail_definition_location": "config"
+    }
+  ]
+}
+
+Successful Response
+
+Create Guardrail​Copy link
+Create a new guardrail
+
+👉 Guardrail docs
+
+Example Request:
+
+curl -X POST "http://localhost:4000/guardrails" \
+    -H "Authorization: Bearer <your_api_key>" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "guardrail": {
+            "guardrail_name": "my-bedrock-guard",
+            "litellm_params": {
+                "guardrail": "bedrock",
+                "mode": "pre_call",
+                "guardrailIdentifier": "ff6ujrregl1q",
+                "guardrailVersion": "DRAFT",
+                "default_on": true
+            },
+            "guardrail_info": {
+                "description": "Bedrock content moderation guardrail"
+            }
+        }
+    }'
+Example Response:
+
+{
+    "guardrail_id": "123e4567-e89b-12d3-a456-426614174000",
+    "guardrail_name": "my-bedrock-guard",
+    "litellm_params": {
+        "guardrail": "bedrock",
+        "mode": "pre_call",
+        "guardrailIdentifier": "ff6ujrregl1q",
+        "guardrailVersion": "DRAFT",
+        "default_on": true
+    },
+    "guardrail_info": {
+        "description": "Bedrock content moderation guardrail"
+    },
+    "created_at": "2023-11-09T12:34:56.789Z",
+    "updated_at": "2023-11-09T12:34:56.789Z"
+}
+Body
+required
+application/json
+guardrailCopy link to guardrail
+Type:object · Guardrail
+required
+Show Guardrailfor guardrail
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/guardrails
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/guardrails \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "guardrail": {
+    "guardrail_id": "",
+    "guardrail_name": "",
+    "litellm_params": null,
+    "guardrail_info": {
+      "additionalProperty": "anything"
+    },
+    "policy_template": "",
+    "created_at": "",
+    "updated_at": ""
+  }
+}'
+
+
+Test Request
+(post /guardrails)
+Status:200
+Status:422
+null
+Successful Response
+
+utils (Collapsed)​Copy link
+utilsOperations
+post
+/utils/test_policies_and_guardrails
+Show More
+Policies (Collapsed)​Copy link
+PoliciesOperations
+post
+/policies
+Show More
+Search Tools (Collapsed)​Copy link
+Search ToolsOperations
+post
+/search_tools
+Show More
+Prompt Management (Collapsed)​Copy link
+Prompt ManagementOperations
+post
+/prompts
+Show More
+files (Collapsed)​Copy link
+filesOperations
+post
+/files
+get
+/files
+post
+/v1/files
+get
+/v1/files
+post
+/{provider}/v1/files
+get
+/{provider}/v1/files
+get
+/files/{file_id}/content
+get
+/v1/files/{file_id}/content
+get
+/{provider}/v1/files/{file_id}/content
+get
+/files/{file_id}
+delete
+/files/{file_id}
+get
+/v1/files/{file_id}
+delete
+/v1/files/{file_id}
+get
+/{provider}/v1/files/{file_id}
+delete
+/{provider}/v1/files/{file_id}
+Show More
+Home​Copy link
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/ \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(get /)
+Status:200
+null
+Successful Response
+
+Get Routes​Copy link
+Get a list of available routes in the FastAPI application.
+
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/routes
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/routes \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN'
+
+
+Test Request
+(get /routes)
+Status:200
+null
+Successful Response
+
+Index Create​Copy link
+Create an index. Just writes the index to the database.
+
+curl -L -X POST 'http://0.0.0.0:4000/indexes/create'         -H 'Content-Type: application/json'         -H 'Authorization: Bearer sk-1234'         -H 'LiteLLM-Beta: indexes_beta=v1'         -d '{ 
+        "index_name": "dall-e-3",
+        "vector_store_index": "real-index-name",
+        "vector_store_name": "azure-ai-search"
+    }'
+Body
+required
+application/json
+index_nameCopy link to index_name
+Type:string · Index Name
+required
+litellm_paramsCopy link to litellm_params
+Type:object · IndexCreateLiteLLMParams
+required
+Show IndexCreateLiteLLMParamsfor litellm_params
+index_infoCopy link to index_info
+Type:object · Index Info
+nullable
+Show Index Infofor index_info
+Responses
+
+200
+Successful Response
+application/json
+
+422
+Validation Error
+application/json
+Request Example forpost/v1/indexes
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/v1/indexes \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'x-litellm-api-key: YOUR_SECRET_TOKEN' \
+  --data '{
+  "index_name": "",
+  "litellm_params": {
+    "vector_store_index": "",
+    "vector_store_name": ""
+  },
+  "index_info": {
+    "additionalProperty": "anything"
+  }
+}'
+
+
+Test Request
+(post /v1/indexes)
+Status:200
+Status:422
+null
+Successful Response
+
+Get Robots​Copy link
+Block all web crawlers from indexing the proxy server endpoints This is useful for ensuring that the API endpoints aren't indexed by search engines
+
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/robots.txt
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/robots.txt
+
+
+Test Request
+(get /robots.txt)
+Status:200
+null
+Successful Response
+
+Get Ui Config​Copy link
+Responses
+
+200
+Successful Response
+application/json
+Request Example forget/litellm/.well-known/litellm-ui-config
+Shell Curl
+curl https://api-ue1-am-apim-nonprod.jll.com/csp/aigateway-dev/litellm/.well-known/litellm-ui-config
+
+
+Test Request
+(get /litellm/.well-known/litellm-ui-config)
+Status:200
+{
+  "server_root_path": "string",
+  "proxy_base_url": "string",
+  "auto_redirect_to_sso": true,
+  "admin_ui_disabled": true,
+  "sso_configured": true
+}
+
+Successful Response
+
+Models
+
+APIKeySecurityScheme​Copy link
+
+AccessControl_UI_AccessMode​Copy link
+
+AccessGroupCreateRequest​Copy link
+
+AccessGroupInfo​Copy link
+
+AccessGroupResponse​Copy link
+
+AccessGroupUpdateRequest​Copy link
+
+ActiveUsersAnalyticsResponse​Copy link
+
+AgentCapabilities​Copy link
+
+AgentCard​Copy link
+
+AgentCard​Copy link
+
+AgentCardSignature​Copy link
+
+AgentConfig​Copy link
+
+AgentCreateInfo​Copy link
+
+AgentCredentialField​Copy link
+
+AgentExtension​Copy link
+
+AgentMakePublicResponse​Copy link
+
+AgentObjectPermission​Copy link
+
+AgentProvider​Copy link
+
+AgentResponse​Copy link
+
+AgentSkill​Copy link
+
+AllowedVectorStoreIndexItem​Copy link
+
+ApplyGuardrailRequest​Copy link
+
+ApplyGuardrailResponse​Copy link
+
+BaseLitellmParams​Copy link
+
+BaseModel​Copy link
+
+BlockKeyRequest​Copy link
+
+BlockTeamRequest​Copy link
+
+BlockedWord​Copy link
+
+BlogPost​Copy link
+
+BlogPostsResponse​Copy link
+
+Body_audio_transcriptions_audio_transcriptions_post​Copy link
+
+Body_audio_transcriptions_v1_audio_transcriptions_post​Copy link
+
+Body_convert_prompt_file_to_json_utils_dotprompt_json_converter_post​Copy link
+
+Body_create_file_files_post​Copy link
+
+Body_create_file_v1_files_post​Copy link
+
+Body_image_edit_api_images_edits_post​Copy link
+
+Body_image_edit_api_openai_deployments__model__images_edits_post​Copy link
+
+Body_image_edit_api_v1_images_edits_post​Copy link
+
+Body_test_model_connection_health_test_connection_post​Copy link
+
+Body_token_endpoint__mcp_server_name__token_post​Copy link
+
+Body_token_endpoint_token_post​Copy link
+
+Body_upload_logo_upload_logo_post​Copy link
+
+Body_video_generation_v1_videos_post​Copy link
+
+Body_video_generation_videos_post​Copy link
+
+BreakdownMetrics​Copy link
+
+BreakdownMetrics​Copy link
+
+BudgetConfig​Copy link
+
+BudgetDeleteRequest​Copy link
+
+BudgetNewRequest​Copy link
+
+BudgetRequest​Copy link
+
+BulkTeamMemberAddRequest​Copy link
+
+BulkTeamMemberAddResponse​Copy link
+
+BulkUpdateKeyRequest​Copy link
+
+BulkUpdateKeyRequestItem​Copy link
+
+BulkUpdateKeyResponse​Copy link
+
+BulkUpdateUserRequest​Copy link
+
+BulkUpdateUserResponse​Copy link
+
+CachePingResponse​Copy link
+
+CacheSettingsField​Copy link
+
+CacheSettingsResponse​Copy link
+
+CacheSettingsUpdateRequest​Copy link
+
+CacheTestRequest​Copy link
+
+CacheTestResponse​Copy link
+
+CallTypes​Copy link
+
+CallbacksByType​Copy link
+
+CancelEvalResponse​Copy link
+
+CancelRunResponse​Copy link
+
+ChatCompletionAnnotation​Copy link
+
+ChatCompletionAnnotationURLCitation​Copy link
+
+ChatCompletionAssistantMessage​Copy link
+
+ChatCompletionAssistantToolCall​Copy link
+
+ChatCompletionAudioObject​Copy link
+
+ChatCompletionAudioResponse​Copy link
+
+ChatCompletionCachedContent​Copy link
+
+ChatCompletionDeveloperMessage​Copy link
+
+ChatCompletionDocumentObject​Copy link
+
+ChatCompletionFileObject​Copy link
+
+ChatCompletionFileObjectFile​Copy link
+
+ChatCompletionFunctionMessage​Copy link
+
+ChatCompletionImageObject​Copy link
+
+ChatCompletionImageUrlObject​Copy link
+
+ChatCompletionMessageToolCall​Copy link
