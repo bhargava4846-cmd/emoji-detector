@@ -1,0 +1,1019 @@
+Finance Data Dictionary Interactive Portal (HTML + AI Enabled) - Business Requirements & Functional Specification
+Executive Summary
+Create a centralized Finance Data Dictionary Portal hosted entirely on a shared drive. The solution will provide chartfield education, combination validation, terminology lookup, tree exploration and future AI capabilities.
+Project Objectives
+Provide a single source of truth, reduce dependency on Excel, enable self-service validation and support future AI guidance.
+Scope
+•	ChartFields Overview
+•	Combination Validator
+•	Finance Terminology
+•	ChartField Trees Explorer
+•	Miscellaneous Knowledge Area
+•	AI Assistant Integration
+Critical Design Principles
+•	Reference Excel workbook is sample/reference only.
+•	All solution artifacts remain on shared drive.
+•	No external database required.
+•	JSON configuration drives application logic.
+•	Local rule engine first, AI second.
+Reference Workbook Usage
+•	Workbook provides sample values, definitions and structures only.
+•	Portal must continue functioning without workbook availability.
+Tab 1 – ChartFields Overview
+•	Visual poster-style representation of Business Unit, Function, Business Line, Market, Account, Alternate Account, Affiliate, Project ID and Book Code.
+•	Hover and click interactions for definitions and examples.
+Tab 2 – Combination Validator
+•	Nine chartfield input controls available.
+•	Fields are optional and not mandatory.
+•	Validate only rules applicable to entered fields.
+•	Return Valid, Invalid or No Applicable Rule Found.
+•	Display violated rule, explanation and recommendation.
+Validation Engine
+•	Store rules in JSON.
+•	Support active Combination Edit logic.
+•	Evaluate ACT_PROJ, ACT_AFF, BL_PRJ, MKT_FCT, BK_ACT and other active rules.
+AI Integration Rules
+•	No AI invocation during standard validation.
+•	AI only for Explain Result, recommendations, free-form questions or unmatched cases.
+•	Use Local JSON => Rule Engine => AI escalation model.
+Tab 3 – Finance Terminology
+•	Searchable glossary using terminology definitions.
+•	Display definition, examples, source systems and consuming systems.
+Tab 4 – ChartField Trees
+•	Collapsible hierarchy browser.
+•	Search nodes and tree metadata.
+Tab 5 – Miscellaneous
+•	Asset Classes
+•	Employee Definitions
+•	Employee Measures
+•	TimeSpans
+•	Project Types
+Shared Drive Architecture
+•	Store HTML, CSS, JS, JSON, images and reference workbook on shared drive only.
+•	No storage outside shared drive.
+Security Requirements
+•	API keys must never be stored in client-side code.
+•	JWT tokens must not be exposed in browser.
+•	Use backend proxy for future AI integration.
+Future Enhancements
+•	Admin page for JSON refresh.
+•	Workbook-to-JSON conversion utility.
+•	Advanced AI assistant.
+Acceptance Criteria
+•	Portal loads within three seconds.
+•	Users can validate chartfield combinations.
+•	Users can search terminology.
+•	AI is called only when required.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+•	Requirements Document
+•	Finance Data Dictionary Interactive Portal (HTML + AI Enabled)
+•	1. Project Overview
+•	
+•	Create a single-page responsive HTML application that acts as an interactive Finance Data Dictionary portal based on the sanitized Finance Data Dictionary workbook.
+•	
+•	The application will be deployed as a static HTML solution on a Shared Drive and accessible by Finance, Operations, Reporting, and Support teams.
+•	
+•	Primary objectives:
+•	
+•	Visualize Finance ChartFields in an easy-to-understand poster format.
+•	Provide interactive ChartField validation.
+•	Provide Finance terminology lookup.
+•	Provide ChartField hierarchy/tree exploration.
+•	Enable future AI-powered Finance Assistant using JLL API framework.
+•	No database required initially.
+•	Data source will be Excel workbook maintained on Shared Drive.
+•	2. Technology Stack
+•	Phase 1
+•	
+•	Frontend:
+•	
+•	HTML5
+•	CSS3
+•	Bootstrap 5
+•	JavaScript
+•	jQuery
+•	
+•	Data Source:
+•	
+•	Excel Workbook
+•	JSON generated from workbook tabs
+•	
+•	Hosting:
+•	
+•	Shared Drive
+•	
+•	Example:
+•	
+•	Plain Text
+•	\\SharedDrive\FinanceDictionary\
+•	index.html
+•	css\
+•	js\
+•	json\
+•	images\
+•	Phase 2 (AI Version)
+•	
+•	Frontend:
+•	
+•	Same HTML portal
+•	
+•	Backend:
+•	
+•	Node.js API Wrapper
+•	
+•	Authentication:
+•	
+•	Okta JWT Token
+•	
+•	AI:
+•	
+•	JLL AI APIs
+•	
+•	Purpose:
+•	
+•	Natural language chartfield assistance
+•	Combo edit explanation
+•	Finance terminology search
+•	Suggested chartfield combinations
+•	3. UI Layout
+•	
+•	Inspired by provided infographic.
+•	
+•	Portal should have:
+•	
+•	Plain Text
+•	-------------------------------------------------
+•	HEADER
+•	-------------------------------------------------
+•	JLL Finance Data Dictionary Portal
+•	Search Box
+•	AI Assistant Button
+•	Version
+•	-------------------------------------------------
+•	 
+•	TAB 1 | TAB 2 | TAB 3 | TAB 4 | TAB 5
+•	-------------------------------------------------
+•	 
+•	CONTENT AREA
+•	4. Tab Structure
+•	TAB 1
+•	ChartFields Overview
+•	
+•	Description:
+•	
+•	Interactive infographic view.
+•	
+•	Based on:
+•	
+•	Plain Text
+•	A-Chartfield Overview
+•	
+•	Visuals Required:
+•	
+•	Cards for:
+•	
+•	Business Unit
+•	Function
+•	Business Line
+•	Market
+•	Account
+•	Alternate Account
+•	Affiliate
+•	Project ID
+•	Book Code
+•	
+•	Each card should display:
+•	
+•	Example:
+•	
+•	Plain Text
+•	BUSINESS UNIT
+•	 
+•	Purpose:
+•	Represents legal entity
+•	 
+•	Structure:
+•	5 Character Code
+•	 
+•	Examples:
+•	US001
+•	IN001
+•	CN001
+•	 
+•	Rules:
+•	Country Based
+•	
+•	Hover Action:
+•	
+•	Show full definition.
+•	
+•	Click Action:
+•	
+•	Open details panel.
+•	
+•	TAB 2
+•	ChartField Combination Validator
+•	
+•	Most important functionality.
+•	
+•	Based on:
+•	
+•	Plain Text
+•	L - Combination Edits
+•	
+•	Purpose
+•	
+•	User enters all chartfield values.
+•	
+•	Portal validates combination.
+•	
+•	Fields Required
+•	
+•	FieldBusiness Unit
+•	Function
+•	Business Line
+•	Market
+•	Account
+•	Alternate Account
+•	Affiliate
+•	Project ID
+•	Book Code
+•	
+•	Validation Button
+•	
+•	Plain Text
+•	[ Validate Combination ]
+•	
+•	Output
+•	
+•	Valid Combination
+•	
+•	or
+•	
+•	Invalid Combination
+•	
+•	Detailed Output
+•	
+•	Example:
+•	
+•	Plain Text
+•	Rule Violated:
+•	 
+•	ACT_PROJ
+•	 
+•	Revenue Accounts Require Project
+•	 
+•	Account:
+•	40025
+•	 
+•	Project ID:
+•	Blank
+•	 
+•	Status:
+•	INVALID
+•	
+•	Validation Engine Rules
+•	
+•	Must support:
+•	
+•	ACT_PROJ
+•	ACT_AFF
+•	BL_PRJ
+•	MKT_FCT
+•	BK_ACT
+•	BL_ACT
+•	BL_ACT_BK
+•	BL_FCT_ACT
+•	FCT_BL_MKT
+•	ACT_FCT1
+•	ACT_FCT2
+•	BL_FCT
+•	ACT_BL
+•	
+•	All active combination edits from L Tab.
+•	
+•	Rule Storage
+•	
+•	JSON
+•	
+•	Example:
+•	
+•	JSON
+•	{
+•	"ruleId":"ACT_PROJ",
+•	"accountRange":"40000-49999",
+•	"projectRequired":true
+•	}
+•	
+•	AI Enhancement
+•	
+•	Add button:
+•	
+•	Plain Text
+•	Explain Why
+•	
+•	AI response:
+•	
+•	Plain Text
+•	This combination failed because:
+•	 
+•	Revenue accounts require a Project ID according to rule ACT_PROJ.
+•	TAB 3
+•	Finance Terminology
+•	
+•	Based on:
+•	
+•	Plain Text
+•	M Tab
+•	
+•	Layout
+•	
+•	Search box
+•	
+•	Plain Text
+•	Search Term
+•	
+•	Examples
+•	
+•	Account
+•	
+•	Function
+•	
+•	Asset Class
+•	
+•	Business Unit
+•	
+•	Market
+•	
+•	Project
+•	
+•	Output
+•	
+•	Definition
+•	
+•	Example
+•	
+•	Process Mapping
+•	
+•	System of Record
+•	
+•	Source System
+•	
+•	Consuming System
+•	
+•	Card Example
+•	
+•	Plain Text
+•	ACCOUNT
+•	 
+•	Definition:
+•	Classifies the nature of a transaction.
+•	 
+•	Example:
+•	40020 Transaction Fees
+•	 
+•	System:
+•	PeopleSoft
+•	
+•	AI Enhancement
+•	
+•	Natural Language Search
+•	
+•	Example:
+•	
+•	Plain Text
+•	What is Business Line?
+•	
+•	AI returns explanation.
+•	
+•	TAB 4
+•	ChartField Trees Explorer
+•	
+•	Based on:
+•	
+•	Plain Text
+•	K Tab
+•	
+•	Purpose
+•	
+•	Visual Hierarchy Browser
+•	
+•	Examples:
+•	
+•	Business Unit Tree
+•	
+•	Function Tree
+•	
+•	Market Tree
+•	
+•	Business Line Tree
+•	
+•	Account Tree
+•	
+•	Project Tree
+•	
+•	UI
+•	
+•	Collapsible Tree
+•	
+•	Example:
+•	
+•	Plain Text
+•	Business Unit
+•	|
+•	+ Americas
+•	+ US
+•	+ Canada
+•	 
+•	+ EMEA
+•	+ UK
+•	+ France
+•	
+•	Features
+•	
+•	Expand
+•	
+•	Collapse
+•	
+•	Search Node
+•	
+•	Node Details
+•	
+•	Tree Metadata
+•	
+•	TAB 5
+•	Miscellaneous
+•	
+•	Consolidated Finance Information.
+•	
+•	Contents:
+•	
+•	Asset Class
+•	
+•	(E Tab)
+•	
+•	Employee Definitions
+•	
+•	(I Tab)
+•	
+•	Employee Measures
+•	
+•	(J Tab)
+•	
+•	Project Types
+•	
+•	(O Tab)
+•	
+•	TimeSpans
+•	
+•	(N Tab)
+•	
+•	Each section should use:
+•	
+•	Accordion Layout
+•	
+•	Searchable
+•	
+•	Filterable
+•	
+•	5. AI Assistant Module
+•	
+•	Future Scope
+•	
+•	Floating Button:
+•	
+•	Plain Text
+•	Ask Finance AI
+•	
+•	Sample Prompts
+•	
+•	Plain Text
+•	What chartfields are required for Revenue Account?
+•	 
+•	Explain Book Code R.
+•	 
+•	What Market should be used for shared services?
+•	 
+•	Explain ACT_PROJ rule.
+•	
+•	Expected Output
+•	
+•	Context-aware responses using:
+•	
+•	Chartfield Overview
+•	Combination Edits
+•	Common Terminology
+•	Chartfield Trees
+•	6. File Structure
+•	Plain Text
+•	FinancePortal
+•	 
+•	index.html
+•	 
+•	css/
+•	style.css
+•	 
+•	js/
+•	app.js
+•	validator.js
+•	ai.js
+•	 
+•	json/
+•	chartfields.json
+•	combinationRules.json
+•	terminology.json
+•	trees.json
+•	employee.json
+•	projecttypes.json
+•	 
+•	images/
+•	chartfield_poster.png
+•	7. Shared Drive Deployment
+•	
+•	Location:
+•	
+•	Plain Text
+•	\\SharedDrive\\FinancePortal
+•	
+•	Maintain:
+•	
+•	Plain Text
+•	Finance Data Dictionary.xlsx
+•	
+•	and
+•	
+•	Plain Text
+•	index.html
+•	
+•	in same directory.
+•	
+•	Versioning:
+•	
+•	Plain Text
+•	v1.0
+•	v1.1
+•	v1.2
+•	
+•	Display version in footer.
+•	
+•	8. Non-Functional Requirements
+•	Performance
+•	Load under 3 seconds
+•	Fully client-side
+•	Browser Support
+•	Edge
+•	Chrome
+•	Firefox
+•	Mobile Support
+•	Responsive layout
+•	Security
+•	No API key stored in HTML
+•	Use backend proxy for AI calls
+•	Okta token handled server-side only
+•	Subscription keys never exposed in browser JavaScript
+•	9. Deliverables
+•	Phase 1
+•	
+•	✅ Responsive HTML Portal
+•	 ✅ ChartField Overview Tab
+•	 ✅ Combination Validator Engine
+•	 ✅ Finance Terminology Search
+•	 ✅ ChartField Trees Browser
+•	 ✅ Miscellaneous Tab
+•	
+•	Phase 2
+•	
+•	✅ JLL AI Integration
+•	 ✅ Natural Language Search
+•	 ✅ Explain Validation Failures
+•	 ✅ Finance Chat Assistant
+•	
+•	Success Criteria
+•	
+•	A Finance user should be able to:
+•	
+•	Understand all major ChartFields visually.
+•	Enter a chartfield combination and instantly know if it is valid.
+•	Search Finance terminology without opening Excel.
+•	Explore ChartField trees visually.
+•	Use AI to understand accounting rules and chartfield logic.
+•	Access everything from a single HTML page stored on the shared drive.
+•	Provide your feedback on BizChat
+•	
+•	
+•	Additional Requirements & Design Decisions
+•	10. Excel Workbook Usage Clarification
+•	Purpose of Excel Workbook
+•	
+•	The Finance Data Dictionary Excel workbook is only a reference source for:
+•	
+•	Sample ChartField values
+•	Sample code structures
+•	Sample Business Units
+•	Sample Functions
+•	Sample Markets
+•	Sample Accounts
+•	Sample Trees
+•	Sample Terminology
+•	
+•	The portal should NOT be tightly coupled to this workbook.
+•	
+•	Requirement
+•	Plain Text
+•	The uploaded Excel workbook shall be treated as a reference document only.
+•	 
+•	All runtime data used by the application shall be maintained
+•	within Shared Drive JSON/Configuration files.
+•	 
+•	The application should continue to function even if the
+•	reference workbook is unavailable.
+•	11. Shared Drive Only Storage Model
+•	Strict Requirement
+•	
+•	No components should be stored externally.
+•	
+•	All artifacts must reside within:
+•	
+•	Plain Text
+•	\\SharedDrive\\FinancePortal
+•	
+•	Including:
+•	
+•	Plain Text
+•	index.html
+•	 
+•	css/
+•	 
+•	js/
+•	 
+•	json/
+•	 
+•	images/
+•	 
+•	config/
+•	 
+•	Finance Data Dictionary.xlsx
+•	No External Databases
+•	
+•	Not required:
+•	
+•	SQL Server
+•	CosmosDB
+•	SharePoint Lists
+•	Dataverse
+•	Azure Storage
+•	Data Source
+•	Plain Text
+•	Shared Drive JSON Files
+•	
+•	Example:
+•	
+•	Plain Text
+•	combinationRules.json
+•	 
+•	chartfields.json
+•	 
+•	trees.json
+•	 
+•	terminology.json
+•	12. Validation Screen Behaviour
+•	User Input
+•	
+•	The following fields should be available:
+•	
+•	Plain Text
+•	Business Unit
+•	 
+•	Function
+•	 
+•	Business Line
+•	 
+•	Market
+•	 
+•	Account
+•	 
+•	Alternate Account
+•	 
+•	Affiliate
+•	 
+•	Project ID
+•	 
+•	Book Code
+•	Not Mandatory
+•	
+•	Users are NOT required to enter all fields.
+•	
+•	Example:
+•	
+•	Valid use case:
+•	
+•	Plain Text
+•	Account = 40025
+•	Project = blank
+•	 
+•	Validate
+•	
+•	System should still process.
+•	
+•	Validation Logic
+•	
+•	When Validate is clicked:
+•	
+•	Step 1
+•	
+•	Identify applicable rules.
+•	
+•	Example:
+•	
+•	Plain Text
+•	ACT_PROJ
+•	 
+•	requires:
+•	 
+•	Account
+•	Project
+•	
+•	If user has entered:
+•	
+•	Plain Text
+•	Business Unit only
+•	
+•	Then:
+•	
+•	Plain Text
+•	No applicable validation rule found.
+•	Step 2
+•	
+•	Skip irrelevant rules.
+•	
+•	Example:
+•	
+•	Rule:
+•	
+•	Plain Text
+•	FCT_BL_MKT
+•	
+•	requires:
+•	
+•	Plain Text
+•	Function
+•	Business Line
+•	Market
+•	
+•	User entered:
+•	
+•	Plain Text
+•	Market only
+•	
+•	Rule should NOT be evaluated.
+•	
+•	Step 3
+•	
+•	Evaluate only applicable rules.
+•	
+•	Example:
+•	
+•	Plain Text
+•	Account=40020
+•	 
+•	Project=blank
+•	
+•	Evaluate:
+•	
+•	Plain Text
+•	ACT_PROJ
+•	
+•	Result:
+•	
+•	Plain Text
+•	INVALID
+•	13. AI Usage Optimization
+•	Critical Requirement
+•	
+•	AI should NOT be called for every validation request.
+•	
+•	Validation Priority
+•	Level 1
+•	
+•	Local Rule Engine
+•	
+•	Always execute first.
+•	
+•	Example:
+•	
+•	Plain Text
+•	Validate Combination
+•	
+•	↓
+•	
+•	Plain Text
+•	Read combinationRules.json
+•	
+•	↓
+•	
+•	Plain Text
+•	Determine valid / invalid
+•	
+•	↓
+•	
+•	Plain Text
+•	Return result
+•	
+•	No AI call.
+•	
+•	AI Trigger Conditions
+•	
+•	AI should only be called for:
+•	
+•	Condition 1
+•	
+•	User clicks
+•	
+•	Plain Text
+•	Explain Result
+•	
+•	Example:
+•	
+•	Plain Text
+•	Why is this invalid?
+•	Condition 2
+•	
+•	User asks free-form questions.
+•	
+•	Examples:
+•	
+•	Plain Text
+•	What does Book Code R mean?
+•	 
+•	Explain ACT_PROJ.
+•	 
+•	What chartfields normally go with Account 40020?
+•	Condition 3
+•	
+•	No matching rule found locally.
+•	
+•	Example:
+•	
+•	Plain Text
+•	Very unusual combination.
+•	 
+•	No matching rule exists.
+•	
+•	System can ask AI for guidance.
+•	
+•	Do Not Call AI For
+•	
+•	❌ Standard validation
+•	
+•	❌ Tree lookup
+•	
+•	❌ ChartField definitions
+•	
+•	❌ Terminology lookup
+•	
+•	❌ Account hierarchy display
+•	
+•	❌ Market hierarchy display
+•	
+•	These should all come from local JSON configuration.
+•	
+•	14. AI Architecture Requirements
+•	Cost Optimization
+•	
+•	Portal should follow:
+•	
+•	Plain Text
+•	Local Rule Engine First
+•	 
+•	AI Second
+•	
+•	Priority:
+•	
+•	Plain Text
+•	JSON Rules
+•	↓
+•	Local Search
+•	↓
+•	AI
+•	
+•	This minimizes:
+•	
+•	API calls
+•	Cost
+•	Latency
+•	15. Expected User Journey
+•	Scenario 1
+•	
+•	User enters:
+•	
+•	Plain Text
+•	Account = 40020
+•	Project = blank
+•	
+•	Clicks:
+•	
+•	Plain Text
+•	Validate
+•	
+•	Output:
+•	
+•	Plain Text
+•	INVALID
+•	 
+•	ACT_PROJ
+•	 
+•	Revenue accounts require Project ID.
+•	
+•	AI Call:
+•	
+•	Plain Text
+•	NO
+•	Scenario 2
+•	
+•	User clicks:
+•	
+•	Plain Text
+•	Explain Why
+•	
+•	Output:
+•	
+•	Plain Text
+•	AI explanation.
+•	 
+•	Revenue accounts are associated with projects
+•	to support client activity tracking.
+•	
+•	AI Call:
+•	
+•	Plain Text
+•	YES
+•	Scenario 3
+•	
+•	User searches:
+•	
+•	Plain Text
+•	Asset Class
+•	
+•	Output:
+•	
+•	Plain Text
+•	Definition from local terminology JSON.
+•	
+•	AI Call:
+•	
+•	Plain Text
+•	NO
+•	Scenario 4
+•	
+•	User asks:
+•	
+•	Plain Text
+•	Suggest a valid combination for a Leasing transaction.
+•	
+•	Output:
+•	
+•	AI generated recommendation.
+•	
+•	AI Call:
+•	
+•	Plain Text
+•	YES
+•	16. Future Enhancement
+•	
+•	Add Administration Page
+•	
+•	Only admins can:
+•	
+•	Upload new Excel reference files
+•	Regenerate JSON files
+•	Update combination rules
+•	Update terminology
+•	Update chartfield trees
+•	
+•	Normal users receive read-only access.
+•	
+•	Final Architecture Principle
+•	
+•	The Excel workbook serves only as a reference template and sample value repository. The portal itself must be fully self-sufficient using Shared Drive-based JSON/configuration files. Validation must be handled locally first, and AI should be invoked only when explanation, recommendation, or advanced guidance is specifically requested.
+•	
+Provide your feedback on BizChat
